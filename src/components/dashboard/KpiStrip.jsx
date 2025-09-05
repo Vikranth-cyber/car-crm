@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiArrowUpRight, FiArrowDownRight, FiMinus } from "react-icons/fi";
-import { FiStar } from "react-icons/fi";
+import { FiArrowUpRight, FiArrowDownRight, FiMinus, FiStar } from "react-icons/fi";
 
 export default function KpiStrip() {
   const [kpis, setKpis] = useState([]);
@@ -9,9 +8,7 @@ export default function KpiStrip() {
     setTimeout(() => {
       setKpis([
         { label: "Sales Today", value: "₹12,500", trend: "up", change: "5.2%" },
-        { label: "EoD Billing", value: "₹42,000", trend: "up", change: "12.1%" },
         { label: "Active Jobs", value: 8, trend: "down", change: "2" },
-        { label: "Avg Job Time", value: "1h 20m", trend: "neutral", change: "0m" },
         { label: "Waitlist Count", value: 5, trend: "up", change: "3" },
         { label: "Store Rating", value: "4.5", trend: "up", change: "0.2" },
       ]);
@@ -32,7 +29,7 @@ export default function KpiStrip() {
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 16,
+        gap: 20,
         marginBottom: 24,
       }}
     >
@@ -42,7 +39,7 @@ export default function KpiStrip() {
             <div style={styles.kLabel}>{k.label}</div>
             <div style={styles.kValue}>
               {k.value}
-              {k.label === "Store Rating" && <FiStar style={{ marginLeft: 6 }} />}
+              {k.label === "Store Rating" && <FiStar style={{ marginLeft: 6, color: "#fbbf24" }} />}
             </div>
           </div>
 
@@ -58,15 +55,21 @@ export default function KpiStrip() {
 const styles = {
   card: {
     background: "#fff",
-    borderRadius: "var(--radius)",
+    borderRadius: "16px",
     padding: 20,
-    boxShadow: "var(--shadow)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+    border: "2px solid transparent",
+    backgroundClip: "padding-box, border-box",
+    backgroundOrigin: "border-box",
+    backgroundImage:
+      "linear-gradient(#fff, #fff), linear-gradient(135deg, #00aaff, #00c3ff)", // gradient border
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
   },
-  kLabel: { fontSize: 13, color: "var(--muted)", marginBottom: 8, fontWeight: 600 },
+  kLabel: { fontSize: 13, color: "#64748b", marginBottom: 8, fontWeight: 600 },
   kValue: { fontSize: 26, fontWeight: 900 },
   chip: {
     display: "inline-flex",

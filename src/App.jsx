@@ -1,4 +1,4 @@
-// App.jsx - Updated with smooth routing for all CRM modules
+// App.jsx - Updated with Notifications screen
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
@@ -15,19 +15,22 @@ import Performance from "./pages/Performance";
 import Billing from "./pages/Billing";
 import Reports from "./pages/Reports";
 
-// New pages from CRM summary
+// Additional features
 import StoreRating from "./pages/StoreRating";
 import Settings from "./pages/Settings";
 import Forms from "./pages/Forms";
+
+// ✅ New Notifications page
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
     <Layout>
       <Routes>
-        {/* Default redirect to Dashboard */}
+        {/* Default redirect */}
         <Route path="/" element={<Navigate to="/admin-dashboard" replace />} />
 
-        {/* Core CRM Modules */}
+        {/* Core modules */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -39,10 +42,13 @@ function App() {
         <Route path="/billing" element={<Billing />} />
         <Route path="/reports" element={<Reports />} />
 
-        {/* Additional CRM Features */}
+        {/* Additional features */}
         <Route path="/store-rating" element={<StoreRating />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/forms" element={<Forms />} />
+
+        {/* ✅ Notifications screen */}
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </Layout>
   );

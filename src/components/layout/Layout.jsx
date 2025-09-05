@@ -1,4 +1,4 @@
-// Layout.jsx - Responsive Ultra-Premium Layout
+// Layout.jsx - clean, Navbar handles bell itself
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
@@ -12,17 +12,17 @@ export default function Layout({ children }) {
     flexDirection: "column",
     minHeight: "100vh",
     width: "100%",
-    backgroundColor: "#fff", // pure white everywhere
+    backgroundColor: "#fff",
     fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
     position: "relative",
-    overflowX: "hidden"
+    overflowX: "hidden",
   };
 
   const mainContainerStyle = {
     display: "flex",
     flex: 1,
     width: "100%",
-    position: "relative"
+    position: "relative",
   };
 
   const overlayStyle = {
@@ -33,22 +33,18 @@ export default function Layout({ children }) {
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 998,
-    display: sidebarOpen ? "block" : "none"
+    display: sidebarOpen ? "block" : "none",
   };
 
   return (
     <div style={layoutStyle}>
-      {/* Mobile overlay for sidebar */}
       <div style={overlayStyle} onClick={() => setSidebarOpen(false)} />
 
+      {/* Navbar has bell icon inside */}
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
       <div style={mainContainerStyle}>
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main
           style={{
             flex: 1,
@@ -56,8 +52,8 @@ export default function Layout({ children }) {
             padding: 0,
             width: "100%",
             maxWidth: "100%",
-            backgroundColor: "#fff", // pure white
-            transition: "all 0.3s ease"
+            backgroundColor: "#fff",
+            transition: "all 0.3s ease",
           }}
         >
           {children}

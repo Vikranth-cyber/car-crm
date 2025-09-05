@@ -24,12 +24,14 @@ export default function QuickActions() {
             onClick={() => navigate(a.path)}
             style={styles.btn}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#2563eb";
+              e.currentTarget.style.background = "#00aaff";
               e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.borderColor = "#00aaff";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "#fff";
-              e.currentTarget.style.color = "#2563eb";
+              e.currentTarget.style.color = "#00aaff";
+              e.currentTarget.style.borderColor = "#00aaff";
             }}
           >
             <span style={styles.icon}>{a.icon}</span>
@@ -44,19 +46,20 @@ export default function QuickActions() {
 const styles = {
   card: {
     background: "#fff",
-    padding: 20,
-    borderRadius: "var(--radius, 12px)",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    padding: 24,
+    borderRadius: "14px",
+    border: "1px solid #e0e0e0",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
     display: "flex",
     flexDirection: "column",
     gap: 16,
   },
   header: {
-    marginBottom: 4,
+    marginBottom: 8,
   },
   title: {
     margin: 0,
-    fontSize: "1.1rem",
+    fontSize: "1.2rem",
     fontWeight: 700,
     color: "#1e293b",
   },
@@ -71,15 +74,15 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "16px",
-    borderRadius: 10,
-    border: "2px solid #2563eb", // ✅ blue border
-    background: "#fff", // ✅ white background
-    color: "#2563eb", // ✅ blue text
+    borderRadius: 12,
+    border: "2px solid #00aaff",
+    background: "#fff",
+    color: "#00aaff",
     fontWeight: 600,
     fontSize: 14,
     cursor: "pointer",
     transition: "all 0.2s ease",
-    minHeight: 100, // ✅ consistent size
+    minHeight: 100,
   },
   icon: {
     fontSize: 28,

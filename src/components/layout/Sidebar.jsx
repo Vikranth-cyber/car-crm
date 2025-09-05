@@ -15,6 +15,7 @@ import {
   FiFileText,
   FiSettings,
   FiX,
+  FiBell,
 } from "react-icons/fi";
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -33,6 +34,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: "Reports", path: "/reports", icon: <FiBarChart2 /> },
     { name: "Store Rating", path: "/store-rating", icon: <FiStar /> },
     { name: "Forms", path: "/forms", icon: <FiFileText /> },
+    { name: "Notifications", path: "/notifications", icon: <FiBell /> }, // ✅ Added
     { name: "Settings", path: "/settings", icon: <FiSettings /> },
   ];
 

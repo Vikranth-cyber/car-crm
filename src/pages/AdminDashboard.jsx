@@ -1,5 +1,4 @@
 import React from "react";
-import { FiRefreshCw } from "react-icons/fi";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LiveJobsWidget from "../components/dashboard/LiveJobsWidget";
 import QuickActions from "../components/dashboard/QuickActions";
@@ -20,7 +19,7 @@ export default function AdminDashboard() {
         padding: 0,
         width: "100%",
         minHeight: "100vh",
-        backgroundColor: "#fff", // ✅ pure white
+        backgroundColor: "#fff", // ✅ pure white background
         color: "#2c3e50",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       }}
@@ -33,6 +32,7 @@ export default function AdminDashboard() {
           display: flex;
           flex-direction: column;
           gap: 28px;
+          background: #fff;
         }
         .dash-header {
           display: flex;
@@ -45,26 +45,11 @@ export default function AdminDashboard() {
           margin: 0;
           font-weight: 700;
           font-size: 1.6rem;
-          color: #00aaff; /* ✅ Blue title */
+          color: #00aaff; /* dashboard blue */
         }
         .dash-header-date {
-          color: #7f8c8d;
+          color: #64748b;
           font-weight: 500;
-        }
-        .dash-refresh {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: #fff;
-          border: 1px solid #ddd;
-          padding: 8px 14px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background .2s;
-          font-weight: 600;
-        }
-        .dash-refresh:hover {
-          background: #f1f1f1;
         }
         .dash-grid {
           display: grid;
@@ -88,16 +73,14 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="dash-header">
           <h1>Dashboard Overview</h1>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div className="dash-header-date">{today}</div>
-            <button className="dash-refresh">
-              <FiRefreshCw /> Refresh
-            </button>
-          </div>
+          <div className="dash-header-date">{today}</div>
         </div>
 
         {/* KPI Strip */}
         <KpiStrip />
+
+        {/* Quick Actions */}
+        <QuickActions />
 
         {/* Main Grid */}
         <div className="dash-grid">
@@ -111,9 +94,6 @@ export default function AdminDashboard() {
             <AlertsPanel />
           </div>
         </div>
-
-        {/* ✅ QuickActions always at bottom (desktop + mobile) */}
-        <QuickActions />
       </div>
     </div>
   );

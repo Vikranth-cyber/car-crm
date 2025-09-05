@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { RiErrorWarningLine, RiAlertLine, RiInformationLine } from "react-icons/ri";
+import { FiBell } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 export default function AlertsPanel() {
   const [alerts, setAlerts] = useState([]);
@@ -27,11 +29,35 @@ export default function AlertsPanel() {
 
   return (
     <div style={styles.card}>
+      {/* Header with title and bell icon */}
       <div style={styles.header}>
-        <h3 style={styles.title}>Alerts & Notifications</h3>
-        <span style={styles.count}>{alerts.length}</span>
+        <h3 style={styles.title}>Alerts</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Bell icon → navigates to Notifications */}
+          <Link to="/notifications" style={{ position: "relative", color: "#1e293b" }}>
+            <FiBell size={22} />
+            {alerts.length > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-6px",
+                  right: "-8px",
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  padding: "2px 6px",
+                  borderRadius: "999px",
+                }}
+              >
+                {alerts.length}
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
 
+      {/* Alerts list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {alerts.length === 0 ? (
           <div style={styles.empty}>No active alerts</div>
@@ -53,17 +79,20 @@ export default function AlertsPanel() {
 }
 
 const styles = {
-  card: { background: "#fff", borderRadius: "var(--radius)", padding: 24, boxShadow: "var(--shadow)" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  title: { fontSize: 18, fontWeight: 800, margin: 0 },
-  count: {
-    background: "linear-gradient(135deg,var(--brand),var(--brand-2))",
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: 800,
-    padding: "4px 10px",
-    borderRadius: 999,
+  card: {
+    background: "#fff",
+    border: "1px solid #ddd",
+    borderRadius: "var(--radius)",
+    padding: 24,
+    boxShadow: "var(--shadow)",
   },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  title: { fontSize: 18, fontWeight: 800, margin: 0 },
   empty: { textAlign: "center", padding: 30, color: "var(--muted)", fontStyle: "italic" },
   item: {
     display: "flex",

@@ -67,7 +67,13 @@ export default function LiveJobsWidget() {
 }
 
 const styles = {
-  card: { background: "#fff", borderRadius: "var(--radius)", padding: 24, boxShadow: "var(--shadow)" },
+  card: {
+    background: "#fff",
+    border: "1px solid #ddd",
+    borderRadius: "var(--radius)",
+    padding: 24,
+    boxShadow: "var(--shadow)",
+  },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   title: { fontSize: 18, fontWeight: 800, margin: 0 },
   link: { color: "var(--brand)", fontSize: 14, fontWeight: 700, cursor: "pointer" },
