@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FiPlus,
-  FiTrash2,
-  FiDownload,
-  FiCheckCircle,
-  FiXCircle,
-  FiFileText,
-} from "react-icons/fi";
+import { FiPlus, FiTrash2, FiFileText, FiX, FiCheck, FiDownload } from "react-icons/fi";
 
 export default function Billing() {
   const [invoices, setInvoices] = useState([
@@ -40,76 +33,120 @@ export default function Billing() {
     },
   ]);
 
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [customer, setCustomer] = useState("");
-  const [items, setItems] = useState([{ description: "", qty: 1, rate: 0 }]);
-  const [taxRate, setTaxRate] = useState(18);
-  const [branding, setBranding] = useState({
-    company: "AquaShine Detailing",
-    address: "12 Orbit Park, Pune, MH 411001",
-    logo: "https://dummyimage.com/120x40/2c3e50/ffffff.png&text=AquaShine",
-  });
+  const [services, setServices] = useState([
+    { id: Date.now(), description: "", qty: 1, charges: 0 },
+  ]);
+  const [notes, setNotes] = useState("");
 
-  const currency = (n) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(Number(n) || 0);
+  const currencyOptions = [
+    { code: "USD", locale: "en-US", label: "USD - $" },
+    { code: "CAD", locale: "en-CA", label: "CAD - $" },
+    { code: "INR", locale: "en-IN", label: "INR - ₹" },
+    { code: "EUR", locale: "de-DE", label: "EUR - €" },
+    { code: "GBP", locale: "en-GB", label: "GBP - £" },
+  ];
+  const [currency, setCurrency] = useState(currencyOptions[1]);
+
+  const currencyFormatter = (n) => {
+    try {
+      return new Intl.NumberFormat(currency.locale, {
+        style: "currency",
+        currency: currency.code,
+        maximumFractionDigits: 2,
+      }).format(Number(n) || 0);
+    } catch (e) {
+      return `${currency.code} ${Number(n || 0).toFixed(2)}`;
+    }
+  };
+
+  const subtotal = useMemo(
+    () =>
+      services.reduce(
+        (a, s) =>
+          a +
+          Number(s.qty || 0) *
+            Number(isNaN(Number(s.charges)) ? 0 : Number(s.charges)),
+        0
+      ),
+    [services]
+  );
+
+  const addService = () =>
+    setServices((p) => [
+      ...p,
+      { id: Date.now() + Math.random(), description: "", qty: 1, charges: 0 },
+    ]);
+  const removeService = (id) =>
+    setServices((p) => (p.length === 1 ? p : p.filter((s) => s.id !== id)));
+  const updateService = (id, field, value) =>
+    setServices((p) =>
+      p.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              [field]: field === "description" ? value : Number(value),
+            }
+          : s
+      )
+    );
+
+  const createBilling = () => {
+    const id = `BILL-${Date.now().toString().slice(-6)}`;
+    const items = services
+      .filter(
+        (s) => s.description.trim() !== "" && Number(s.qty) > 0
+      )
+      .map((s) => ({
+        description: s.description,
+        qty: s.qty,
+        rate: s.charges,
+      }));
+
+    const newInv = {
+      id,
+      customer: customer || "Unnamed Customer",
+      items,
+      taxRate: 0,
+      branding: {
+        company: "AquaShine Detailing",
+        address: "12 Orbit Park, Pune, MH 411001",
+        logo: "https://dummyimage.com/120x40/2c3e50/ffffff.png&text=AquaShine",
+      },
+      status: "Draft",
+      source: "billing-created",
+      issuedOn: null,
+      notes,
+      currency: currency.code,
+    };
+    setInvoices((p) => [newInv, ...p]);
+    setCustomer("");
+    setServices([{ id: Date.now(), description: "", qty: 1, charges: 0 }]);
+    setNotes("");
+    setShowModal(false);
+  };
 
   const totalsFor = (inv) => {
     const sub = inv.items.reduce(
       (a, it) => a + Number(it.qty) * Number(it.rate),
       0
     );
-    const tax = (sub * Number(inv.taxRate)) / 100;
+    const tax = (sub * Number(inv.taxRate || 0)) / 100;
     const total = sub + tax;
     return { sub, tax, total };
   };
 
-  const counts = useMemo(() => {
-    return invoices.reduce(
-      (acc, i) => {
+  const counts = useMemo(
+    () =>
+      invoices.reduce((acc, i) => {
         acc[i.status] = (acc[i.status] || 0) + 1;
         return acc;
-      },
-      { Draft: 0, Issued: 0, Paid: 0, Void: 0 }
-    );
-  }, [invoices]);
+      }, { Draft: 0, Issued: 0, Paid: 0, Void: 0 }),
+    [invoices]
+  );
 
-  const resetForm = () => {
-    setCustomer("");
-    setItems([{ description: "", qty: 1, rate: 0 }]);
-    setTaxRate(18);
-  };
-
-  const addItem = () =>
-    setItems((p) => [...p, { description: "", qty: 1, rate: 0 }]);
-
-  const removeItem = (idx) =>
-    setItems((p) => p.filter((_, i) => i !== idx));
-
-  const updateItem = (idx, field, value) =>
-    setItems((p) =>
-      p.map((it, i) => (i === idx ? { ...it, [field]: value } : it))
-    );
-
-  const createInvoice = () => {
-    const id = `INV-${Date.now().toString().slice(-6)}`;
-    const newInv = {
-      id,
-      customer: customer || "Unnamed Customer",
-      items: items.filter((i) => i.description && Number(i.qty) > 0),
-      taxRate: Number(taxRate) || 0,
-      branding: { ...branding },
-      status: "Draft",
-      issuedOn: null,
-    };
-    setInvoices((p) => [newInv, ...p]);
-    setShowForm(false);
-    resetForm();
-  };
-
-  const setStatus = (id, status) => {
+  const setStatus = (id, status) =>
     setInvoices((p) =>
       p.map((inv) =>
         inv.id === id
@@ -124,191 +161,223 @@ export default function Billing() {
           : inv
       )
     );
-  };
 
-  const exportPDF = (inv) => {
-    const { sub, tax, total } = totalsFor(inv);
-    const html = `
-      <html>
-      <head><title>${inv.id} - Invoice</title></head>
-      <body><h2>${inv.branding.company} - Invoice</h2></body>
-      </html>
-    `;
-    const w = window.open("", "_blank");
-    w.document.write(html);
-    w.document.close();
-  };
+  useEffect(() => {
+    document.body.style.fontFamily =
+      'Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial';
+  }, []);
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 20, background: "#fff" }}>
-      <div style={{ marginBottom: 20, padding: 20, borderRadius: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", background: "#fff" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <h2 style={{ margin: 0, color: "#007bff" }}>Billing & Invoices</h2>
-            <div style={{ color: "#7f8c8d", marginTop: 6, fontSize: 14 }}>
-              Draft: {counts.Draft} • Issued: {counts.Issued} • Paid: {counts.Paid} • Void: {counts.Void}
-            </div>
-          </div>
-          <button
-            style={btn("#007bff")}
-            onClick={() => {
-              resetForm();
-              setShowForm(true);
-            }}
+    <div className="billing-root">
+      <style>{`
+        :root{--accent:#0b5ed7;--muted:#6c757d}
+        .billing-root{max-width:1200px;margin:22px auto;padding:18px}
+        .header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+        .title h2{margin:0;color:var(--accent);letter-spacing:0.2px}
+        .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
+        .controls{display:flex;gap:10px;align-items:center}
+        .btn{border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+        .btn.primary{background:linear-gradient(90deg,var(--accent),#007bff);color:#fff;box-shadow:0 8px 30px rgba(11,94,215,0.12)}
+        .btn.ghost{background:transparent;border:1px solid #e6eefc;color:var(--accent)}
+        .panel{background:linear-gradient(180deg,#fff,#fbfdff);padding:16px;border-radius:12px;box-shadow:0 12px 40px rgba(12,18,41,0.06)}
+        .table-wrap{overflow-x:auto;margin-top:10px}
+        table{width:100%;border-collapse:collapse;min-width:720px}
+        th{background:#f7f9fc;color:var(--accent);font-weight:700;padding:12px;border-bottom:1px solid #eef2f7;text-align:left}
+        td{padding:12px;border-bottom:1px solid #f3f6f9;vertical-align:top}
+        .action-group{display:flex;gap:8px;flex-wrap:wrap}
+        .modal-overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(10,12,20,0.45), rgba(3,4,6,0.45));display:flex;align-items:center;justify-content:center;z-index:1200;padding:20px}
+        .modal{width:100%;max-width:980px;background:rgba(255,255,255,0.98);backdrop-filter:blur(6px);border-radius:14px;padding:18px;position:relative;box-shadow:0 30px 80px rgba(11,32,70,0.18);max-height:90vh;overflow-y:auto}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .modal-body{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:14px}
+        .left{display:flex;flex-direction:column;gap:12px}
+        .service-row{display:grid;grid-template-columns: 1fr 84px 1fr 48px;gap:10px;align-items:center}
+        .service-row input[type="text"], .service-row input[type="number"], .job-customer, .job-notes{width:100%;padding:10px;border-radius:10px;border:1px solid #eef2f7;font-size:14px;outline:none}
+        .add-service{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .right{background:#f9fbff;padding:14px;border-radius:10px;height:100%}
+        .summary-row{display:flex;justify-content:space-between;padding:8px 0}
+        .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+        .total-bubble{position:absolute;right:22px;bottom:22px;background:linear-gradient(90deg,#0b5ed7,#00a0ff);color:white;padding:12px 18px;border-radius:12px;font-weight:800;box-shadow:0 8px 28px rgba(11,94,215,0.18);display:flex;flex-direction:column;align-items:flex-end;min-width:180px}
+        .muted{color:var(--muted);font-size:13px}
+        .service-desc{font-weight:600}
+        @media (max-width:920px){
+          .modal-body{grid-template-columns:1fr;gap:14px}
+          .total-bubble{position:static;margin-top:12px}
+        }
+        @media (max-width:600px){
+          .service-row{grid-template-columns:1fr 70px 1fr 40px}
+        }
+        @media (max-width:400px){
+          .service-row{grid-template-columns:1fr 60px 1fr 36px}
+        }
+      `}</style>
+
+      <div className="header">
+        <div className="title">
+          <h2>Billing</h2>
+          <p className="subtitle">Manage all invoices and bills seamlessly</p>
+        </div>
+        <div className="controls">
+          <select
+            value={currency.code}
+            onChange={(e) =>
+              setCurrency(
+                currencyOptions.find((c) => c.code === e.target.value)
+              )
+            }
           >
-            <FiPlus /> Create Invoice
+            {currencyOptions.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <button className="btn primary" onClick={() => setShowModal(true)}>
+            <FiPlus /> Create Billing
           </button>
         </div>
-
-        {showForm && (
-          <div style={{ marginTop: 20, border: "1px solid #eef2f7", borderRadius: 12, padding: 20 }}>
-            <div style={{ display: "grid", gap: 12 }}>
-              <input
-                value={customer}
-                onChange={(e) => setCustomer(e.target.value)}
-                placeholder="Customer Name"
-                style={input}
-              />
-              <input
-                type="number"
-                value={taxRate}
-                onChange={(e) => setTaxRate(e.target.value)}
-                placeholder="Tax Rate %"
-                style={input}
-              />
-              {items.map((it, i) => (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 8 }}>
-                  <input
-                    value={it.description}
-                    onChange={(e) => updateItem(i, "description", e.target.value)}
-                    placeholder="Description"
-                    style={input}
-                  />
-                  <input
-                    type="number"
-                    value={it.qty}
-                    onChange={(e) => updateItem(i, "qty", e.target.value)}
-                    placeholder="Qty"
-                    style={input}
-                  />
-                  <input
-                    type="number"
-                    value={it.rate}
-                    onChange={(e) => updateItem(i, "rate", e.target.value)}
-                    placeholder="Rate"
-                    style={input}
-                  />
-                  <button style={btn("#e74c3c")} onClick={() => removeItem(i)}>
-                    <FiTrash2 />
-                  </button>
-                </div>
-              ))}
-              <button style={btn("#2ecc71")} onClick={addItem}>
-                <FiPlus /> Add Item
-              </button>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button style={btn("#6c757d")} onClick={() => setShowForm(false)}>Cancel</button>
-                <button style={btn("#007bff")} onClick={createInvoice}>Save Draft</button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      <div style={{ padding: 20, borderRadius: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", background: "#fff" }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 720 }}>
-            <thead>
-              <tr>
-                {["Invoice", "Customer", "Amount", "Tax", "Total", "Status", "Actions"].map((h, i) => (
-                  <th key={i} style={th}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv) => {
-                const { sub, tax, total } = totalsFor(inv);
-                return (
-                  <tr key={inv.id}>
-                    <td style={cell}>{inv.id}</td>
-                    <td style={cell}>{inv.customer}</td>
-                    <td style={cell}>{currency(sub)}</td>
-                    <td style={cell}>{currency(tax)}</td>
-                    <td style={{ ...cell, fontWeight: 700 }}>{currency(total)}</td>
-                    <td style={cell}>{inv.status}</td>
-                    <td style={cell}>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {inv.status === "Draft" && (
-                          <button style={btn("#2980b9")} onClick={() => setStatus(inv.id, "Issued")}>
-                            <FiFileText /> Issue
-                          </button>
-                        )}
-                        {inv.status !== "Paid" && (
-                          <button style={btn("#2ecc71")} onClick={() => setStatus(inv.id, "Paid")}>
-                            <FiCheckCircle /> Paid
-                          </button>
-                        )}
-                        {inv.status !== "Void" && (
-                          <button style={btn("#e74c3c")} onClick={() => setStatus(inv.id, "Void")}>
-                            <FiXCircle /> Void
-                          </button>
-                        )}
-                        <button style={btn("#6c757d")} onClick={() => exportPDF(inv)}>
-                          <FiDownload /> PDF
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {invoices.length === 0 && (
-                <tr>
-                  <td style={cell} colSpan={7}>
-                    No invoices yet.
+      <div className="panel table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Issued On</th>
+              <th>Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.map((inv) => {
+              const t = totalsFor(inv);
+              return (
+                <tr key={inv.id}>
+                  <td>{inv.id}</td>
+                  <td>{inv.customer}</td>
+                  <td>{inv.status}</td>
+                  <td>{inv.issuedOn || "-"}</td>
+                  <td>{currencyFormatter(t.total)}</td>
+                  <td>
+                    <div className="action-group">
+                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Issued")}>
+                        <FiFileText /> Issue
+                      </button>
+                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Paid")}>
+                        <FiCheck /> Paid
+                      </button>
+                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Void")}>
+                        <FiX /> Void
+                      </button>
+                      <button className="btn ghost">
+                        <FiDownload /> Download
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Create Billing</h3>
+              <button className="btn ghost" onClick={() => setShowModal(false)}>
+                <FiX />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="left">
+                <input
+                  className="job-customer"
+                  placeholder="Customer Name"
+                  value={customer}
+                  onChange={(e) => setCustomer(e.target.value)}
+                />
+
+                {services.map((s) => (
+                  <div key={s.id} className="service-row">
+                    <input
+                      type="text"
+                      placeholder="Service Description"
+                      value={s.description}
+                      onChange={(e) =>
+                        updateService(s.id, "description", e.target.value)
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Qty"
+                      value={s.qty}
+                      onChange={(e) =>
+                        updateService(s.id, "qty", e.target.value)
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Cost"
+                      value={s.charges}
+                      onChange={(e) =>
+                        updateService(s.id, "charges", e.target.value)
+                      }
+                    />
+                    <button
+                      className="btn ghost"
+                      onClick={() => removeService(s.id)}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                ))}
+
+                <div className="add-service">
+                  <button className="btn ghost" onClick={addService}>
+                    <FiPlus /> Add Service
+                  </button>
+                </div>
+
+                <textarea
+                  className="job-notes"
+                  placeholder="Additional Notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="right">
+                <h4>Billing Summary</h4>
+                <div className="summary-row">
+                  <span>Subtotal:</span>
+                  <span>{currencyFormatter(subtotal)}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Tax (0%):</span>
+                  <span>{currencyFormatter(0)}</span>
+                </div>
+                <div className="summary-row">
+                  <strong>Total:</strong>
+                  <strong>{currencyFormatter(subtotal)}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn ghost" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
+              <button className="btn primary" onClick={createBilling}>
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-const btn = (bg) => ({
-  background: bg,
-  color: "#fff",
-  border: "none",
-  padding: "10px 14px",
-  borderRadius: 10,
-  cursor: "pointer",
-  fontWeight: 600,
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-});
-
-const input = {
-  width: "100%",
-  padding: "10px 12px",
-  border: "1px solid #e1e5ea",
-  borderRadius: 10,
-  fontSize: 14,
-  outline: "none",
-};
-
-const th = {
-  textAlign: "left",
-  background: "#f7f9fc",
-  color: "#007bff",
-  fontWeight: 700,
-  padding: "12px 12px",
-  borderBottom: "1px solid #eef2f7",
-};
-
-const cell = {
-  padding: "12px 12px",
-  borderBottom: "1px solid #f0f3f7",
-  verticalAlign: "top",
-};
