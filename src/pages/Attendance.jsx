@@ -1,4 +1,11 @@
+// Attendance.jsx
 import React, { useState } from "react";
+import {
+  FiCheckCircle,
+  FiXCircle,
+  FiEdit,
+  FiSave,
+} from "react-icons/fi";
 
 export default function Attendance() {
   const [records, setRecords] = useState([
@@ -24,11 +31,13 @@ export default function Attendance() {
   const [newIn, setNewIn] = useState("");
   const [newOut, setNewOut] = useState("");
 
-  // Manager approves/rejects
+  // Manager approves/rejects (only if Pending)
   const handleApproval = (id, action) => {
     setRecords((prev) =>
       prev.map((r) =>
-        r.id === id ? { ...r, status: action } : r
+        r.id === id && r.status === "Pending"
+          ? { ...r, status: action }
+          : r
       )
     );
 
@@ -43,12 +52,12 @@ export default function Attendance() {
     );
   };
 
-  // Manager edits
+  // Manager edits (only if Pending)
   const saveEdit = () => {
     if (!selectedEdit) return;
     setRecords((prev) =>
       prev.map((r) =>
-        r.id === selectedEdit
+        r.id === selectedEdit && r.status === "Pending"
           ? {
               ...r,
               hours: [{ in: newIn, out: newOut }],
@@ -87,7 +96,7 @@ export default function Attendance() {
       <h2
         style={{
           marginBottom: "24px",
-          color: "#0b63ff",
+          color: "#00aaff",
           fontSize: "24px",
           fontWeight: 700,
           textAlign: "center",
@@ -152,9 +161,9 @@ export default function Attendance() {
               </span>
             </div>
 
-            {/* Hourly Tracking */}
+            {/* Hours */}
             <div style={{ fontSize: "15px", marginBottom: "12px" }}>
-              <strong style={{ color: "#0b63ff" }}>Hours:</strong>
+              <strong style={{ color: "#00aaff" }}>Hours:</strong>
               {rec.hours.map((h, idx) => (
                 <span
                   key={idx}
@@ -172,30 +181,35 @@ export default function Attendance() {
               ))}
             </div>
 
-            {/* Buttons */}
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button
-                style={btnStyle("#0d9488")}
-                onClick={() => handleApproval(rec.id, "Approved")}
-              >
-                ✅ Approve
-              </button>
-              <button
-                style={btnStyle("#dc2626")}
-                onClick={() => handleApproval(rec.id, "Rejected")}
-              >
-                ❌ Reject
-              </button>
-              <button
-                style={btnStyle("#0b63ff")}
-                onClick={() => setSelectedEdit(rec.id)}
-              >
-                ✏️ Edit
-              </button>
-            </div>
+            {/* Action buttons (only if Pending) */}
+            {rec.status === "Pending" && (
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  style={btnStyle("#0d9488")}
+                  onClick={() => handleApproval(rec.id, "Approved")}
+                >
+                  <FiCheckCircle style={{ marginRight: "6px" }} />
+                  Approve
+                </button>
+                <button
+                  style={btnStyle("#dc2626")}
+                  onClick={() => handleApproval(rec.id, "Rejected")}
+                >
+                  <FiXCircle style={{ marginRight: "6px" }} />
+                  Reject
+                </button>
+                <button
+                  style={btnStyle("#00aaff")}
+                  onClick={() => setSelectedEdit(rec.id)}
+                >
+                  <FiEdit style={{ marginRight: "6px" }} />
+                  Edit
+                </button>
+              </div>
+            )}
 
-            {/* Edit form */}
-            {selectedEdit === rec.id && (
+            {/* Edit form (only if Pending) */}
+            {selectedEdit === rec.id && rec.status === "Pending" && (
               <div
                 style={{
                   marginTop: "14px",
@@ -217,7 +231,8 @@ export default function Attendance() {
                   style={{ ...inputBox }}
                 />
                 <button style={btnStyle("#1e293b")} onClick={saveEdit}>
-                  💾 Save
+                  <FiSave style={{ marginRight: "6px" }} />
+                  Save
                 </button>
               </div>
             )}
@@ -231,7 +246,7 @@ export default function Attendance() {
                   color: "#475569",
                 }}
               >
-                <strong style={{ color: "#0b63ff" }}>Logs:</strong>
+                <strong style={{ color: "#00aaff" }}>Logs:</strong>
                 <ul>
                   {rec.logs.map((l, i) => (
                     <li key={i}>{l}</li>
@@ -256,6 +271,8 @@ const btnStyle = (bg) => ({
   fontWeight: 600,
   fontSize: "14px",
   transition: "background 0.2s",
+  display: "flex",
+  alignItems: "center",
 });
 
 const inputBox = {

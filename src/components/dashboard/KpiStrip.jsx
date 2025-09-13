@@ -28,7 +28,7 @@ export default function KpiStrip() {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
         gap: 20,
         marginBottom: 24,
       }}
@@ -56,28 +56,36 @@ const styles = {
   card: {
     background: "#fff",
     borderRadius: "16px",
-    padding: 20,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+    padding: 24,
+    boxShadow: "var(--shadow)",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
-    border: "2px solid transparent",
-    backgroundClip: "padding-box, border-box",
-    backgroundOrigin: "border-box",
-    backgroundImage:
-      "linear-gradient(#fff, #fff), linear-gradient(135deg, #00aaff, #00c3ff)", // gradient border
+    border: "1px solid #f1f5f9",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
   },
-  kLabel: { fontSize: 13, color: "#64748b", marginBottom: 8, fontWeight: 600 },
-  kValue: { fontSize: 26, fontWeight: 900 },
+  kLabel: { 
+    fontSize: 14, 
+    color: "#64748b", 
+    marginBottom: 8, 
+    fontWeight: 600,
+    letterSpacing: "0.01em",
+  },
+  kValue: { 
+    fontSize: 28, 
+    fontWeight: 800,
+    color: "#1e293b",
+    display: "flex",
+    alignItems: "center",
+  },
   chip: {
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
     fontWeight: 800,
-    fontSize: 12,
-    padding: "6px 10px",
+    fontSize: 13,
+    padding: "6px 12px",
     borderRadius: 999,
   },
 };

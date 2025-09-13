@@ -1,8 +1,7 @@
-// Layout.jsx - clean, Navbar handles bell itself
+// Layout.jsx
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import FloatingChat from "../shared/FloatingChat";
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,7 +11,7 @@ export default function Layout({ children }) {
     flexDirection: "column",
     minHeight: "100vh",
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
     position: "relative",
     overflowX: "hidden",
@@ -23,6 +22,8 @@ export default function Layout({ children }) {
     flex: 1,
     width: "100%",
     position: "relative",
+    minHeight: 0,
+    marginTop: "72px", // Push content below navbar
   };
 
   const overlayStyle = {
@@ -38,10 +39,9 @@ export default function Layout({ children }) {
 
   return (
     <div style={layoutStyle}>
-      <div style={overlayStyle} onClick={() => setSidebarOpen(false)} />
-
-      {/* Navbar has bell icon inside */}
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
+      <div style={overlayStyle} onClick={() => setSidebarOpen(false)} />
 
       <div style={mainContainerStyle}>
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -49,18 +49,18 @@ export default function Layout({ children }) {
           style={{
             flex: 1,
             margin: 0,
-            padding: 0,
+            padding: "1.5rem",
             width: "100%",
             maxWidth: "100%",
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
             transition: "all 0.3s ease",
+            minHeight: 0,
+            overflow: "auto",
           }}
         >
           {children}
         </main>
       </div>
-
-      <FloatingChat />
     </div>
   );
 }

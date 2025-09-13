@@ -1,10 +1,15 @@
 // Jobs.jsx
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  FiEye,
+  FiCheckCircle,
+  FiAlertTriangle,
+  FiUpload,
+  FiPlus,
+  FiX,
+} from "react-icons/fi";
 
-/**
- * Simplified sample data for STAFF, SERVICES and CUSTOMERS.
- * In production these would come from your backend endpoints.
- */
+import { useNavigate } from "react-router-dom";
 
 const STAFF = [
   { id: "S001", name: "Ramesh" },
@@ -35,12 +40,18 @@ const SERVICES = [
     name: "Wheel Alignment",
     steps: ["Check-in", "Alignment Setup", "Alignment Run", "Test Drive", "Quality Check"],
   },
+  {
+    id: "SV005",
+    name: "Brake Service",
+    steps: ["Check-in", "Inspection", "Brake Pad Replacement", "Testing", "Quality Check"],
+  },
+  {
+    id: "SV006",
+    name: "Battery Replacement",
+    steps: ["Check-in", "Testing", "Replacement", "Charging", "Quality Check"],
+  },
 ];
 
-/**
- * Sample customers dataset with mobile and known vehicles.
- * Backend should own this; here it's used for auto-fill demo.
- */
 const CUSTOMERS = [
   {
     name: "Rahul Sharma",
@@ -63,14 +74,17 @@ function fmtMinutes(minutes) {
 }
 
 export default function Jobs() {
-  // --- initial jobs (sample) ---
+  const navigate = useNavigate(); 
   const [jobs, setJobs] = useState([
     {
       id: "JOB001",
       customer: "Rahul Sharma",
       mobile: "9000000001",
       vehicle: "MH12AB1234 - Honda City",
-      services: [{ id: "SV001", name: "Full Car Cleaning", steps: [] }],
+      services: [
+        { id: "SV001", name: "Full Car Cleaning", steps: [] },
+        { id: "SV002", name: "AC Service", steps: [] },
+      ],
       status: "In Progress",
       bay: "Bay 2",
       eta: "30 mins",
@@ -102,6 +116,14 @@ export default function Jobs() {
         },
         {
           key: "s4",
+          name: "AC Diagnosis",
+          status: "Pending",
+          staffId: "S004",
+          start: null,
+          end: null,
+        },
+        {
+          key: "s5",
           name: "Quality Check",
           status: "Pending",
           staffId: "S004",
@@ -110,13 +132,19 @@ export default function Jobs() {
         },
       ],
       delays: [],
+      preInspection: "Small scratch on left bumper. Fuel: half tank.",
+      preInspectionMedia: [], // example: [{ id, url, type }]
     },
     {
       id: "JOB002",
       customer: "Priya Verma",
       mobile: "9000000002",
       vehicle: "TS09XY5678 - Hyundai i20",
-      services: [{ id: "SV003", name: "Oil Change", steps: [] }],
+      services: [
+        { id: "SV003", name: "Oil Change", steps: [] },
+        { id: "SV004", name: "Wheel Alignment", steps: [] },
+        { id: "SV005", name: "Brake Service", steps: [] },
+      ],
       status: "Waiting",
       bay: "-",
       eta: "Pending",
@@ -146,8 +174,26 @@ export default function Jobs() {
           start: null,
           end: null,
         },
+        {
+          key: "s4",
+          name: "Alignment Setup",
+          status: "Waiting",
+          staffId: null,
+          start: null,
+          end: null,
+        },
+        {
+          key: "s5",
+          name: "Brake Inspection",
+          status: "Waiting",
+          staffId: null,
+          start: null,
+          end: null,
+        },
       ],
       delays: [],
+      preInspection: "",
+      preInspectionMedia: [],
     },
   ]);
 
@@ -167,6 +213,7 @@ export default function Jobs() {
     bay: "",
     selectedServices: [], // array of { id, name, serviceId, steps: [{name, staffId}] }
     preInspectionNotes: "",
+    preInspectionMedia: [], // { id, file, url, type }
   };
   const [newJobDraft, setNewJobDraft] = useState(emptyNewJob);
 
@@ -284,7 +331,7 @@ export default function Jobs() {
     return null;
   }
 
-  // compute staff busy set from existing jobs (any non-null staff assigned in stages or job.staffAssigned)
+  // compute staff occupied set from existing jobs (any non-null staff assigned in stages or job.staffAssigned)
   const busyStaffIds = useMemo(() => {
     const set = new Set();
     jobs.forEach((j) => {
@@ -301,17 +348,18 @@ export default function Jobs() {
 
   // ----------------------- Styles -----------------------
   const theme = {
-    primary: "#0b5cff",
+    primary: "#00aaff",
     muted: "#6b7280",
     surface: "#ffffff",
-    cardShadow: "0 6px 20px rgba(11,92,255,0.08)",
+    cardShadow: "0 10px 30px rgba(11,92,255,0.08)",
+    subtleShadow: "0 6px 18px rgba(2,6,23,0.04)",
   };
 
   const containerStyle = {
-    padding: "20px",
+    padding: "24px",
     fontFamily:
       "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
-    background: "#ffffff" ,
+    background: "#ffffff",
     minHeight: "100vh",
     boxSizing: "border-box",
   };
@@ -327,26 +375,25 @@ export default function Jobs() {
 
   const leftHeader = { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" };
 
-  const titleStyle = { color: theme.primary, fontSize: 20, fontWeight: 700 };
+  const titleStyle = { color: theme.primary, fontSize: 22, fontWeight: 800 };
 
-  // search style: decreased width on smaller screens as requested
   const searchStyle = {
     padding: "10px 14px",
-    borderRadius: 10,
-    border: "1px solid #e6e9f2",
-    minWidth:
-      windowWidth < 420 ? 180 : windowWidth < 768 ? Math.min(360, windowWidth * 0.45) : 260,
+    borderRadius: 12,
+    border: "1px solid rgba(14,46,124,0.06)",
+    minWidth: windowWidth < 420 ? 180 : windowWidth < 768 ? Math.min(420, windowWidth * 0.45) : 340,
     width: windowWidth < 420 ? 180 : "auto",
-    boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
+    background: "#fff",
   };
 
   const btnPrimary = {
-    background: `linear-gradient(90deg, ${theme.primary}, #0058d6)`,
+    background: `linear-gradient(90deg, ${theme.primary}, #0066ff)`,
     color: "#fff",
     padding: "10px 14px",
-    borderRadius: 10,
+    borderRadius: 12,
     border: "none",
-    fontWeight: 700,
+    fontWeight: 800,
     cursor: "pointer",
     boxShadow: theme.cardShadow,
     whiteSpace: "nowrap",
@@ -354,44 +401,45 @@ export default function Jobs() {
 
   const viewToggle = {
     display: "flex",
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: "hidden",
-    boxShadow: "0 2px 8px rgba(16,24,40,0.04)",
+    boxShadow: theme.subtleShadow,
   };
 
   const pill = (active) => ({
-    padding: "8px 12px",
+    padding: "8px 14px",
     background: active ? theme.primary : "transparent",
     color: active ? "#fff" : theme.muted,
     cursor: "pointer",
-    fontWeight: 600,
+    fontWeight: 700,
+    fontSize: 13,
   });
 
   const tableCard = {
     background: theme.surface,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     boxShadow: theme.cardShadow,
     overflowX: "auto",
   };
 
-  const th = { textAlign: "left", padding: 12, color: "#111827", fontWeight: 700, fontSize: 13 };
-  const td = { padding: 12, borderTop: "1px solid #f1f3f8", fontSize: 13 };
+  const th = { textAlign: "left", padding: 14, color: "#0f172a", fontWeight: 800, fontSize: 13 };
+  const td = { padding: 14, borderTop: "1px solid #f1f3f8", fontSize: 14, verticalAlign: "middle" };
 
   const kanbanContainerStyle = {
     display: "flex",
-    gap: 12,
+    gap: 14,
     overflowX: windowWidth < 1024 ? "auto" : "hidden",
     paddingTop: 8,
     flexWrap: windowWidth < 1024 ? "nowrap" : "wrap",
   };
 
   const kanbanColumn = {
-    minWidth: windowWidth < 1024 ? 260 : "calc(20% - 12px)",
+    minWidth: windowWidth < 1024 ? 280 : "calc(20% - 14px)",
     background: "#fff",
     borderRadius: 12,
-    padding: 12,
-    boxShadow: "0 4px 18px rgba(2,6,23,0.04)",
+    padding: 14,
+    boxShadow: theme.subtleShadow,
     flex: windowWidth < 1024 ? "0 0 auto" : "1",
   };
 
@@ -412,7 +460,6 @@ export default function Jobs() {
     const id = `JOB${String(Math.floor(Math.random() * 9000) + 1000)}`;
     const newStages = [];
     newJobDraft.selectedServices.forEach((svc, svcIndex) => {
-      // svc.stepsAssigned: [{ name, staffId }]
       svc.stepsAssigned.forEach((step, i) => {
         newStages.push({
           key: `s${Date.now()}_${svcIndex}_${i}`,
@@ -438,15 +485,15 @@ export default function Jobs() {
       stages: newStages.length ? newStages : [{ key: `s${Date.now()}_0`, name: "Check-in", status: "Waiting", staffId: null, start: null, end: null }],
       delays: [],
       preInspection: newJobDraft.preInspectionNotes || "",
+      preInspectionMedia: (newJobDraft.preInspectionMedia || []).map((m) => ({ id: m.id, url: m.url, type: m.type })),
     };
 
     setJobs((p) => [job, ...p]);
-    // reset form
+    // cleanup object URLs to avoid leak
     setNewJobDraft(emptyNewJob);
     setShowAddJob(false);
   }
 
-  // --- helpers for new job form: service search/selection, assigning steps & staff, customer mobile lookup ---
   function findCustomerByMobile(mobile) {
     if (!mobile) return null;
     return CUSTOMERS.find((c) => c.mobile === mobile) || null;
@@ -462,7 +509,6 @@ export default function Jobs() {
         vehicle: c.vehicles[0] || "",
       }));
     } else {
-      // try to find from jobs history
       const j = jobs.find((job) => job.mobile === mobile);
       if (j) {
         setNewJobDraft((p) => ({
@@ -478,7 +524,6 @@ export default function Jobs() {
   }
 
   function addServiceToDraft(serviceObj) {
-    // avoid duplicates by service id
     if (newJobDraft.selectedServices.some((s) => s.id === serviceObj.id)) return;
     const stepsAssigned = serviceObj.steps.map((st) => ({ name: st, staffId: null }));
     setNewJobDraft((p) => ({
@@ -502,11 +547,49 @@ export default function Jobs() {
     }));
   }
 
-  // search helper for services: returns filtered by text
   function searchServices(q) {
     const t = (q || "").trim().toLowerCase();
     if (!t) return SERVICES;
     return SERVICES.filter((s) => s.name.toLowerCase().includes(t) || s.id.toLowerCase().includes(t));
+  }
+
+  // Mark job done from table - sets stages done and timestamps and status Ready
+  function markJobDone(jobId) {
+    setJobs((prev) =>
+      prev.map((j) => {
+        if (j.id !== jobId) return j;
+        const now = new Date().toISOString();
+        const stages = j.stages.map((s) => ({
+          ...s,
+          start: s.start || now,
+          end: s.end || now,
+          status: "Done",
+        }));
+        return { ...j, stages, status: "Ready" };
+      })
+    );
+  }
+
+  // ----------------- Media upload helpers -----------------
+  function handleMediaChange(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const mapped = files.map((f) => {
+      const url = URL.createObjectURL(f);
+      return {
+        id: `m${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        file: f,
+        url,
+        type: f.type.startsWith("video") ? "video" : "image",
+      };
+    });
+    setNewJobDraft((p) => ({ ...p, preInspectionMedia: [...(p.preInspectionMedia || []), ...mapped] }));
+    // reset input value (if you re-upload same file)
+    e.target.value = null;
+  }
+
+  function removeNewDraftMedia(id) {
+    setNewJobDraft((p) => ({ ...p, preInspectionMedia: p.preInspectionMedia.filter((m) => m.id !== id) }));
   }
 
   // ----------------------- Render -----------------------
@@ -515,7 +598,6 @@ export default function Jobs() {
       <div style={headerStyle}>
         <div style={leftHeader}>
           <div style={titleStyle}>Jobs Management</div>
-          {/* subtitle removed as requested */}
         </div>
 
         <div style={headerControlsStyle}>
@@ -534,7 +616,7 @@ export default function Jobs() {
             </div>
           </div>
           <button style={btnPrimary} onClick={() => setShowAddJob(true)}>
-            + Add JOB
+            <FiPlus style={{ verticalAlign: "middle", marginRight: 8 }} /> Add JOB
           </button>
         </div>
       </div>
@@ -551,7 +633,7 @@ export default function Jobs() {
                 <th style={th}>Status</th>
                 <th style={th}>Progress</th>
                 <th style={th}>Bay</th>
-                <th style={th}>ETA</th>
+                <th style={th}>Billing</th>
                 <th style={th}>Actions</th>
               </tr>
             </thead>
@@ -566,11 +648,11 @@ export default function Jobs() {
                     <span
                       style={{
                         display: "inline-block",
-                        padding: "6px 10px",
+                        padding: "8px 12px",
                         borderRadius: 999,
-                        background: j.status === "Delayed" ? "#ffdede" : "#eef2ff",
-                        color: j.status === "Delayed" ? "#b91c1c" : theme.primary,
-                        fontWeight: 700,
+                        background: j.status === "Delayed" ? "#fff1f2" : "#eef6ff",
+                        color: j.status === "Delayed" ? "#dc2626" : theme.primary,
+                        fontWeight: 800,
                         fontSize: 12,
                       }}
                     >
@@ -578,48 +660,105 @@ export default function Jobs() {
                     </span>
                   </td>
                   <td style={td}>
-                    <div style={{ width: 160 }}>
-                      <div style={{ fontSize: 12, color: theme.muted }}>{jobProgressPct(j)}% complete</div>
+                    <div style={{ width: 220, maxWidth: "100%" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ fontSize: 13, color: theme.muted }}>{jobProgressPct(j)}% complete</div>
+                        <div style={{ fontSize: 12, color: theme.muted }}>{fmtMinutes((jobProgressPct(j) / 100) * 60)}</div>
+                      </div>
                       <div
                         style={{
-                          height: 8,
-                          background: "#f1f5f9",
+                          height: 10,
+                          background: "#eef2ff",
                           borderRadius: 999,
-                          marginTop: 6,
+                          marginTop: 8,
                           overflow: "hidden",
+                          boxShadow: "inset 0 -2px 6px rgba(2,6,23,0.02)",
                         }}
                       >
                         <div
                           style={{
                             width: `${jobProgressPct(j)}%`,
                             height: "100%",
-                            background: "linear-gradient(90deg,#0b5cff,#00a3ff)",
+                            background: "linear-gradient(90deg,#06b6d4,#0b5cff)",
                           }}
                         />
                       </div>
                     </div>
                   </td>
                   <td style={td}>{j.bay}</td>
-                  <td style={td}>{j.eta}</td>
                   <td style={td}>
-                    <button
-                      onClick={() => openJobDetails(j.id)}
-                      style={{
-                        padding: "8px 10px",
-                        borderRadius: 8,
-                        border: "1px solid rgba(11,92,255,0.12)",
-                        background: "white",
-                        cursor: "pointer",
-                      }}
-                    >
-                      View
-                    </button>
+  <button
+    onClick={() =>
+      navigate("/billing", {
+        state: {
+          fromJob: true,
+          customer: j.customer,
+          services: (j.services || []).map(s => ({
+            description: s.name,
+            qty: 1,
+            charges: 0,   // user will fill
+          }))
+        }
+      })
+    }
+    disabled={jobProgressPct(j) < 100}   // ✅ enable only if 100%
+    style={{
+      padding: "8px 12px",
+      borderRadius: 10,
+      border: "none",
+      cursor: jobProgressPct(j) === 100 ? "pointer" : "not-allowed",
+      background: jobProgressPct(j) === 100
+        ? "linear-gradient(90deg,#059669,#10b981)"
+        : "#e5e7eb",
+      color: jobProgressPct(j) === 100 ? "#fff" : "#9ca3af",
+      fontWeight: 700,
+      boxShadow: jobProgressPct(j) === 100 ? "0 4px 12px rgba(16,185,129,0.3)" : "none",
+    }}
+  >
+    Create Bill
+  </button>
+</td>
+                  <td style={td}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <button
+                        onClick={() => openJobDetails(j.id)}
+                        title="View details"
+                        style={{
+                          padding: 8,
+                          borderRadius: 10,
+                          border: "1px solid rgba(11,92,255,0.08)",
+                          background: "#fff",
+                          cursor: "pointer",
+                          boxShadow: "0 4px 12px rgba(2,6,23,0.03)",
+                        }}
+                        aria-label={`View ${j.id}`}
+                      >
+                        <FiEye />
+                      </button>
+
+                      <button
+                        onClick={() => markJobDone(j.id)}
+                        title="Mark done"
+                        style={{
+                          padding: 8,
+                          borderRadius: 10,
+                          border: "1px solid rgba(16,185,129,0.08)",
+                          background: "#fff",
+                          cursor: "pointer",
+                          color: "#059669",
+                          boxShadow: "0 4px 12px rgba(2,6,23,0.03)",
+                        }}
+                        aria-label={`Mark ${j.id} done`}
+                      >
+                        <FiCheckCircle />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {filteredJobs.length === 0 && (
                 <tr>
-                  <td colSpan={9} style={{ padding: 20, color: theme.muted }}>
+                  <td colSpan={9} style={{ padding: 40, color: theme.muted }}>
                     No jobs found
                   </td>
                 </tr>
@@ -632,7 +771,7 @@ export default function Jobs() {
           {Object.entries(kanbanColumns).map(([status, list]) => (
             <div key={status} style={kanbanColumn}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div style={{ fontWeight: 800, color: theme.primary }}>{status}</div>
+                <div style={{ fontWeight: 900, color: theme.primary }}>{status}</div>
                 <div style={{ fontSize: 12, color: theme.muted }}>{list.length}</div>
               </div>
 
@@ -641,19 +780,19 @@ export default function Jobs() {
                   key={job.id}
                   style={{
                     padding: 12,
-                    borderRadius: 10,
-                    background: "#f8fafc",
+                    borderRadius: 12,
+                    background: "#f8fbff",
                     marginBottom: 10,
-                    boxShadow: "0 6px 18px rgba(2,6,23,0.03)",
+                    boxShadow: "0 8px 30px rgba(2,6,23,0.04)",
                     cursor: "pointer",
                   }}
                   onClick={() => openJobDetails(job.id)}
                 >
-                  <div style={{ fontWeight: 800 }}>{job.id} • {job.customer}</div>
+                  <div style={{ fontWeight: 900, fontSize: 15 }}>{job.id} • {job.customer}</div>
                   <div style={{ fontSize: 13, color: theme.muted, marginTop: 6 }}>{job.vehicle}</div>
-                  <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 12, color: "#475569" }}>{(job.services || []).map(s => s.name || s).join(", ")}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#0b5cff" }}>{jobProgressPct(job)}%</div>
+                  <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 13, color: "#475569" }}>{(job.services || []).map(s => s.name || s).join(", ")}</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "#0b5cff" }}>{jobProgressPct(job)}%</div>
                   </div>
                 </div>
               ))}
@@ -683,10 +822,20 @@ export default function Jobs() {
             boxSizing: "border-box",
           }}
         >
-          <div style={{ width: windowWidth < 760 ? "100%" : 960, maxHeight: "92vh", overflowY: "auto", background: "#fff", borderRadius: 12, padding: 18 }}>
+          <div
+            style={{
+              width: windowWidth < 760 ? "100%" : 980,
+              maxHeight: "92vh",
+              overflowY: "auto", // main scroll at modal
+              background: "#fff",
+              borderRadius: 14,
+              padding: 20,
+              boxShadow: "0 20px 60px rgba(2,6,23,0.12)",
+            }}
+          >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexDirection: windowWidth < 600 ? "column" : "row" }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{selectedJob.id} — {selectedJob.customer}</div>
+                <div style={{ fontSize: 20, fontWeight: 900 }}>{selectedJob.id} — {selectedJob.customer}</div>
                 <div style={{ color: theme.muted, marginTop: 6 }}>{selectedJob.vehicle} • Bay: {selectedJob.bay}</div>
                 <div style={{ marginTop: 8 }}>
                   <strong>Services:</strong> {(selectedJob.services || []).map(s => s.name || s).join(", ")}
@@ -694,20 +843,22 @@ export default function Jobs() {
               </div>
 
               <div style={{ textAlign: windowWidth < 600 ? "left" : "right" }}>
-                <div style={{ fontWeight: 800, color: theme.primary }}>{selectedJob.status}</div>
-                <div style={{ marginTop: 6, fontSize: 13, color: theme.muted }}>{jobProgressPct(selectedJob)}% complete</div>
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ fontWeight: 900, color: theme.primary, fontSize: 16 }}>{selectedJob.status}</div>
+                <div style={{ marginTop: 8, fontSize: 13, color: theme.muted }}>{jobProgressPct(selectedJob)}% complete</div>
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: windowWidth < 600 ? "flex-start" : "flex-end" }}>
                   <button
-                    style={{ ...btnPrimary, padding: "8px 10px" }}
+                    style={{ ...btnPrimary, padding: "8px 12px" }}
                     onClick={() => {
                       saveSelectedJobEdits();
                     }}
+                    title="Save changes"
                   >
                     Save
                   </button>
                   <button
-                    style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #e6e9f2", background: "#fff" }}
+                    style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #eef2f7", background: "#fff" }}
                     onClick={() => setSelectedJob(null)}
+                    title="Close"
                   >
                     Close
                   </button>
@@ -715,129 +866,166 @@ export default function Jobs() {
               </div>
             </div>
 
-            <hr style={{ margin: "14px 0", border: 0, height: 1, background: "#f1f5f9" }} />
+            <hr style={{ margin: "16px 0", border: 0, height: 1, background: "#f1f5f9" }} />
 
-            <div style={{ overflowX: "auto", marginTop: 6 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={{ ...th, width: 36 }}>#</th>
-                    <th style={th}>Stage</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Staff</th>
-                    <th style={th}>Start</th>
-                    <th style={th}>End</th>
-                    <th style={th}>Duration</th>
-                    <th style={th}>Avg (historical)</th>
-                    <th style={th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedJob.stages.map((s, idx) => {
-                    const duration = s.start && s.end ? (new Date(s.end) - new Date(s.start)) / (1000 * 60) : null;
-                    const histAvg = avgCompleteTimeForStageName(s.name);
-                    return (
-                      <tr key={s.key}>
-                        <td style={td}>{idx + 1}</td>
-                        <td style={td}><strong>{s.name}</strong></td>
-                        <td style={td}>
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                            <div style={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: 999,
-                              background:
-                                s.status === "Done" ? "#10b981" :
-                                  s.status === "In Progress" ? "#0ea5e9" :
-                                    s.status === "Delayed" ? "#ef4444" : "#f59e0b"
-                            }} />
-                            <div style={{ fontWeight: 700 }}>{s.status}</div>
-                          </div>
-                        </td>
-                        <td style={td}>
-                          <select
-                            value={s.staffId || ""}
-                            onChange={(e) => changeStageStaff(s.key, e.target.value || null)}
-                            style={{ padding: 8, borderRadius: 8, border: "1px solid #e6edf7", minWidth: 160 }}
-                          >
-                            <option value="">Unassigned</option>
-                            {STAFF.map((stf) => (
-                              <option key={stf.id} value={stf.id}>
-                                {stf.id} — {stf.name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td style={td}>
-                          <input
-                            type="datetime-local"
-                            value={s.start ? new Date(s.start).toISOString().slice(0, 16) : ""}
-                            onChange={(e) => {
-                              const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
-                              setSelectedJob((prev) => {
-                                return {
-                                  ...prev,
-                                  stages: prev.stages.map((st) => (st.key === s.key ? { ...st, start: iso } : st)),
-                                };
-                              });
-                            }}
-                            style={{ padding: 8, borderRadius: 8, border: "1px solid #edf2f7" }}
-                          />
-                        </td>
-                        <td style={td}>
-                          <input
-                            type="datetime-local"
-                            value={s.end ? new Date(s.end).toISOString().slice(0, 16) : ""}
-                            onChange={(e) => {
-                              const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
-                              setSelectedJob((prev) => {
-                                return {
-                                  ...prev,
-                                  stages: prev.stages.map((st) => (st.key === s.key ? { ...st, end: iso } : st)),
-                                };
-                              });
-                            }}
-                            style={{ padding: 8, borderRadius: 8, border: "1px solid #edf2f7" }}
-                          />
-                        </td>
-                        <td style={td}>{fmtMinutes(duration)}</td>
-                        <td style={td}>{fmtMinutes(histAvg)}</td>
-                        <td style={td}>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <button
-                              onClick={() => toggleStartStage(s.key)}
-                              style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #e6edf7", background: "#fff" }}
-                            >
-                              {s.start ? (s.end ? "Done" : "Toggle End") : "Start"}
-                            </button>
+            {/* Pre-inspection media & notes */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ fontWeight: 900 }}>Pre-inspection</div>
+              </div>
 
-                            <button
-                              onClick={() => {
-                                const reason = window.prompt("Describe delay reason (short):");
-                                if (reason) reportDelay(s.key, reason);
-                              }}
-                              style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ffdede", background: "#fff" }}
-                            >
-                              Delay report
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                {selectedJob.preInspectionMedia && selectedJob.preInspectionMedia.length > 0 ? (
+                  selectedJob.preInspectionMedia.map((m) => (
+                    <div key={m.id} style={{ width: 120, borderRadius: 8, overflow: "hidden", background: "#f8fafc", boxShadow: "0 6px 18px rgba(2,6,23,0.04)" }}>
+                      {m.type === "image" ? (
+                        <img src={m.url} alt="pre" style={{ width: "100%", height: 90, objectFit: "cover", display: "block" }} />
+                      ) : (
+                        <video src={m.url} controls style={{ width: "100%", height: 90, display: "block", objectFit: "cover" }} />
+                      )}
+                      <div style={{ padding: 8, fontSize: 12, color: theme.muted }}>{m.type.toUpperCase()}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ color: theme.muted }}>No images or videos were uploaded for pre-inspection.</div>
+                )}
+              </div>
+
+              {selectedJob.preInspection ? (
+                <div style={{ marginTop: 10, padding: 12, background: "#fbfdff", borderRadius: 10, border: "1px solid #eef6ff" }}>
+                  <div style={{ fontWeight: 700 }}>Notes</div>
+                  <div style={{ marginTop: 6, color: "#374151" }}>{selectedJob.preInspection}</div>
+                </div>
+              ) : null}
             </div>
 
+            {/* Stages table */}
+            <div style={{ marginTop: 6 }}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...th, width: 36 }}>#</th>
+                      <th style={th}>Stage</th>
+                      <th style={th}>Status</th>
+                      <th style={th}>Staff</th>
+                      <th style={th}>Start</th>
+                      <th style={th}>End</th>
+                      <th style={th}>Duration</th>
+                      <th style={th}>Avg (historical)</th>
+                      <th style={th}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedJob.stages.map((s, idx) => {
+                      const duration = s.start && s.end ? (new Date(s.end) - new Date(s.start)) / (1000 * 60) : null;
+                      const histAvg = avgCompleteTimeForStageName(s.name);
+                      return (
+                        <tr key={s.key}>
+                          <td style={td}>{idx + 1}</td>
+                          <td style={td}><strong>{s.name}</strong></td>
+                          <td style={td}>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              <div style={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: 999,
+                                background:
+                                  s.status === "Done" ? "#10b981" :
+                                    s.status === "In Progress" ? "#06b6d4" :
+                                      s.status === "Delayed" ? "#ef4444" : "#f59e0b"
+                              }} />
+                              <div style={{ fontWeight: 800 }}>{s.status}</div>
+                            </div>
+                          </td>
+                          <td style={td}>
+                            <select
+                              value={s.staffId || ""}
+                              onChange={(e) => changeStageStaff(s.key, e.target.value || null)}
+                              style={{ padding: 8, borderRadius: 8, border: "1px solid #e6edf7", minWidth: 180 }}
+                            >
+                              <option value="">{/* Show "Available" as placeholder */}Available</option>
+                              {STAFF.map((stf) => (
+                                <option key={stf.id} value={stf.id}>
+                                  {stf.id} — {stf.name} {busyStaffIds.has(stf.id) ? " (Occupied)" : " (Available)"}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td style={td}>
+                            <input
+                              type="datetime-local"
+                              value={s.start ? new Date(s.start).toISOString().slice(0, 16) : ""}
+                              onChange={(e) => {
+                                const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
+                                setSelectedJob((prev) => {
+                                  return {
+                                    ...prev,
+                                    stages: prev.stages.map((st) => (st.key === s.key ? { ...st, start: iso } : st)),
+                                  };
+                                });
+                              }}
+                              style={{ padding: 8, borderRadius: 8, border: "1px solid #edf2f7" }}
+                            />
+                          </td>
+                          <td style={td}>
+                            <input
+                              type="datetime-local"
+                              value={s.end ? new Date(s.end).toISOString().slice(0, 16) : ""}
+                              onChange={(e) => {
+                                const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
+                                setSelectedJob((prev) => {
+                                  return {
+                                    ...prev,
+                                    stages: prev.stages.map((st) => (st.key === s.key ? { ...st, end: iso } : st)),
+                                  };
+                                });
+                              }}
+                              style={{ padding: 8, borderRadius: 8, border: "1px solid #edf2f7" }}
+                            />
+                          </td>
+                          <td style={td}>{fmtMinutes(duration)}</td>
+                          <td style={td}>{fmtMinutes(histAvg)}</td>
+                          <td style={td}>
+                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                              <button
+  onClick={() => toggleStartStage(s.key)}
+  style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #e6edf7", background: "#fff", cursor: "pointer", color: s.end ? "#059669" : "#0b5cff" }}
+  title={s.start ? (s.end ? "Completed" : "Mark as done") : "Start stage"}
+>
+  {s.end ? <FiCheckCircle /> : (s.start ? "End" : "Start")}
+</button>
+                              <button
+                                onClick={() => {
+                                  const reason = window.prompt("Describe delay reason (short):");
+                                  if (reason) reportDelay(s.key, reason);
+                                }}
+                                title="Report delay"
+                                style={{ padding: 8, borderRadius: 10, border: "1px solid #ffdede", background: "#fff", cursor: "pointer" }}
+                                aria-label="Report delay"
+                              >
+                                <FiAlertTriangle />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Delay Reports */}
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Delay Reports</div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>Delay Reports</div>
               {selectedJob.delays.length === 0 && <div style={{ color: theme.muted }}>No delays reported.</div>}
               {selectedJob.delays.map((d, i) => {
                 const st = selectedJob.stages.find((s) => s.key === d.stageKey);
                 return (
-                  <div key={i} style={{ padding: 10, background: "#fff7ed", borderRadius: 8, marginBottom: 8 }}>
-                    <div style={{ fontWeight: 700 }}>{st?.name || d.stageKey} • {new Date(d.reportedAt).toLocaleString()}</div>
-                    <div style={{ color: "#92400e" }}>{d.reason}</div>
+                  <div key={i} style={{ padding: 12, background: "#fff7ed", borderRadius: 10, marginBottom: 10, border: "1px solid #ffe7c5" }}>
+                    <div style={{ fontWeight: 800 }}>{st?.name || d.stageKey} • {new Date(d.reportedAt).toLocaleString()}</div>
+                    <div style={{ color: "#92400e", marginTop: 4 }}>{d.reason}</div>
                   </div>
                 );
               })}
@@ -866,10 +1054,12 @@ export default function Jobs() {
             boxSizing: "border-box",
           }}
         >
-          <div style={{ width: windowWidth < 700 ? "100%" : 1000, maxHeight: "92vh", overflowY: "auto", background: "#fff", borderRadius: 12, padding: 18 }}>
+          <div style={{ width: windowWidth < 700 ? "100%" : 1000, maxHeight: "92vh", overflowY: "auto", background: "#fff", borderRadius: 14, padding: 18, boxShadow: "0 20px 60px rgba(2,6,23,0.12)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 800, fontSize: 18 }}>Add New JOB</div>
-              <button style={{ border: "none", background: "transparent", fontSize: 20 }} onClick={() => setShowAddJob(false)}>✕</button>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>Add New JOB</div>
+              <button style={{ border: "none", background: "transparent", fontSize: 20 }} onClick={() => setShowAddJob(false)} aria-label="Close add job">
+                <FiX />
+              </button>
             </div>
 
             {/* Form main grid */}
@@ -937,19 +1127,17 @@ export default function Jobs() {
               <div style={{ gridColumn: windowWidth < 900 ? "auto" : "1 / -1", background: "#fff", padding: 12, borderRadius: 10, border: "1px solid #eef2f7" }}>
                 <div style={{ fontWeight: 800, marginBottom: 8 }}>Job Details</div>
 
-                {/* Services selection: searchable combobox + add */}
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
                   <ServiceCombo onAdd={addServiceToDraft} />
                   <div style={{ marginLeft: "auto", fontSize: 13, color: theme.muted }}>
-                    Free staff: {freeStaff.length} • Busy staff: {busyStaff.length}
+                    Available: {freeStaff.length} • Occupied: {busyStaff.length}
                   </div>
                 </div>
 
-                {/* Selected services with ability to assign staff to each step */}
                 <div style={{ display: "grid", gap: 12 }}>
                   {newJobDraft.selectedServices.length === 0 && <div style={{ color: theme.muted }}>No services selected yet.</div>}
                   {newJobDraft.selectedServices.map((svc) => (
-                    <div key={svc.id} style={{ border: "1px solid #f1f5f9", padding: 10, borderRadius: 8, background: "#fbfdff" }}>
+                    <div key={svc.id} style={{ border: "1px solid #f1f5f9", padding: 12, borderRadius: 10, background: "#fbfdff" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div style={{ fontWeight: 800 }}>{svc.name} <span style={{ color: theme.muted, fontSize: 12 }}>({svc.id})</span></div>
                         <div style={{ display: "flex", gap: 8 }}>
@@ -966,7 +1154,7 @@ export default function Jobs() {
                               <th style={th}>Assign Staff</th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody> 
                             {svc.stepsAssigned.map((st, idx) => (
                               <tr key={idx}>
                                 <td style={td}>{idx + 1}</td>
@@ -977,10 +1165,10 @@ export default function Jobs() {
                                     onChange={(e) => setServiceStepStaff(svc.id, idx, e.target.value || null)}
                                     style={{ padding: 8, borderRadius: 8, border: "1px solid #e6edf7", minWidth: 180 }}
                                   >
-                                    <option value="">Unassigned</option>
+                                    <option value="">Available</option>
                                     {STAFF.map((stf) => (
                                       <option key={stf.id} value={stf.id}>
-                                        {stf.id} — {stf.name} {busyStaffIds.has(stf.id) ? " (busy)" : " (free)"}
+                                        {stf.id} — {stf.name} {busyStaffIds.has(stf.id) ? " (Occupied)" : " (Available)"}
                                       </option>
                                     ))}
                                   </select>
@@ -1007,12 +1195,42 @@ export default function Jobs() {
                 <div style={{ marginTop: 10, fontSize: 13, color: theme.muted }}>
                   Notes will be saved with job and visible in staff portal.
                 </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <input type="file" accept="image/*,video/*" multiple onChange={handleMediaChange} style={{ display: "none" }} />
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 10, background: "#fff", border: "1px solid #e6edf7" }}>
+                      <FiUpload /> Upload images & videos
+                    </div>
+                  </label>
+
+                  {/* previews */}
+                  <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                    {newJobDraft.preInspectionMedia && newJobDraft.preInspectionMedia.length > 0 ? (
+                      newJobDraft.preInspectionMedia.map((m) => (
+                        <div key={m.id} style={{ width: 110, borderRadius: 8, overflow: "hidden", background: "#fff", border: "1px solid #eef2f7", position: "relative" }}>
+                          <button onClick={() => removeNewDraftMedia(m.id)} title="Remove" style={{ position: "absolute", right: 6, top: 6, zIndex: 6, background: "rgba(255,255,255,0.9)", borderRadius: 8, border: "none", padding: 4, cursor: "pointer" }}>
+                            <FiX />
+                          </button>
+                          {m.type === "image" ? (
+                            <img src={m.url} alt="preview" style={{ width: "100%", height: 80, objectFit: "cover", display: "block" }} />
+                          ) : (
+                            <video src={m.url} controls style={{ width: "100%", height: 80, display: "block", objectFit: "cover" }} />
+                          )}
+                          <div style={{ padding: 8, fontSize: 11, color: theme.muted }}>{m.type.toUpperCase()}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ color: theme.muted }}>No media uploaded yet.</div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Footer actions */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-              <button onClick={() => { setShowAddJob(false); setNewJobDraft(emptyNewJob); }} style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #e6e9f2", background: "#fff" }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+              <button onClick={() => { setShowAddJob(false); setNewJobDraft(emptyNewJob); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid #e6e9f2", background: "#fff" }}>
                 Cancel
               </button>
               <button onClick={createNewJob} style={btnPrimary}>
@@ -1025,6 +1243,7 @@ export default function Jobs() {
     </div>
   );
 }
+
 function ServiceCombo({ onAdd }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -1057,12 +1276,12 @@ function ServiceCombo({ onAdd }) {
       </div>
 
       {open && (
-        <div style={{ position: "absolute", left: 0, right: 0, top: 44, background: "#fff", borderRadius: 8, boxShadow: "0 8px 30px rgba(2,6,23,0.08)", zIndex: 40, maxHeight: 220, overflow: "auto", border: "1px solid #eef2f7" }}>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 44, background: "#fff", borderRadius: 10, boxShadow: "0 12px 40px rgba(2,6,23,0.08)", zIndex: 40, maxHeight: 220, overflow: "auto", border: "1px solid #eef2f7" }}>
           {matches.length === 0 && <div style={{ padding: 12, color: "#6b7280" }}>No services</div>}
           {matches.map((s) => (
             <div key={s.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderBottom: "1px solid #f1f5f9" }}>
               <div>
-                <div style={{ fontWeight: 700 }}>{s.name}</div>
+                <div style={{ fontWeight: 800 }}>{s.name}</div>
                 <div style={{ fontSize: 12, color: "#6b7280" }}>{s.id} • {s.steps.length} steps</div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>

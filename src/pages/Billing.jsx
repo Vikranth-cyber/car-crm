@@ -1,13 +1,24 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FiPlus, FiTrash2, FiFileText, FiX, FiCheck, FiDownload } from "react-icons/fi";
+import {
+  FiPlus,
+  FiTrash2,
+  FiFileText,
+  FiX,
+  FiCheck,
+  FiDownload,
+} from "react-icons/fi";
+import { useLocation } from "react-router-dom";
 
 export default function Billing() {
+  const location = useLocation();
+
   const [invoices, setInvoices] = useState([
     {
       id: "INV-1001",
       customer: "Rahul Sharma",
       items: [{ description: "Full Service Wash", qty: 1, rate: 2000 }],
       taxRate: 18,
+      discountPercent: 5,
       branding: {
         company: "AquaShine Detailing",
         address: "12 Orbit Park, Pune, MH 411001",
@@ -22,6 +33,7 @@ export default function Billing() {
       customer: "Priya Verma",
       items: [{ description: "Interior Cleaning", qty: 1, rate: 1500 }],
       taxRate: 18,
+      discountPercent: 0,
       branding: {
         company: "AquaShine Detailing",
         address: "12 Orbit Park, Pune, MH 411001",
@@ -38,7 +50,24 @@ export default function Billing() {
   const [services, setServices] = useState([
     { id: Date.now(), description: "", qty: 1, charges: 0 },
   ]);
+  const [taxRate, setTaxRate] = useState(0);
+  const [discountPercent, setDiscountPercent] = useState(0);
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (location.state?.fromJob) {
+      setCustomer(location.state.customer || "");
+      setServices(
+        (location.state.services || []).map((s) => ({
+          id: Date.now() + Math.random(),
+          description: s.description || "",
+          qty: 1,
+          charges: 0,
+        }))
+      );
+      setShowModal(true);
+    }
+  }, [location.state]);
 
   const currencyOptions = [
     { code: "USD", locale: "en-US", label: "USD - $" },
@@ -73,6 +102,21 @@ export default function Billing() {
     [services]
   );
 
+  const taxAmount = useMemo(
+    () => (subtotal * Number(taxRate || 0)) / 100,
+    [subtotal, taxRate]
+  );
+
+  const discountAmount = useMemo(
+    () => (subtotal * Number(discountPercent || 0)) / 100,
+    [subtotal, discountPercent]
+  );
+
+  const total = useMemo(
+    () => subtotal + taxAmount - discountAmount,
+    [subtotal, taxAmount, discountAmount]
+  );
+
   const addService = () =>
     setServices((p) => [
       ...p,
@@ -95,9 +139,7 @@ export default function Billing() {
   const createBilling = () => {
     const id = `BILL-${Date.now().toString().slice(-6)}`;
     const items = services
-      .filter(
-        (s) => s.description.trim() !== "" && Number(s.qty) > 0
-      )
+      .filter((s) => s.description.trim() !== "" && Number(s.qty) > 0)
       .map((s) => ({
         description: s.description,
         qty: s.qty,
@@ -108,7 +150,8 @@ export default function Billing() {
       id,
       customer: customer || "Unnamed Customer",
       items,
-      taxRate: 0,
+      taxRate,
+      discountPercent,
       branding: {
         company: "AquaShine Detailing",
         address: "12 Orbit Park, Pune, MH 411001",
@@ -123,6 +166,8 @@ export default function Billing() {
     setInvoices((p) => [newInv, ...p]);
     setCustomer("");
     setServices([{ id: Date.now(), description: "", qty: 1, charges: 0 }]);
+    setTaxRate(0);
+    setDiscountPercent(0);
     setNotes("");
     setShowModal(false);
   };
@@ -133,8 +178,9 @@ export default function Billing() {
       0
     );
     const tax = (sub * Number(inv.taxRate || 0)) / 100;
-    const total = sub + tax;
-    return { sub, tax, total };
+    const discount = (sub * Number(inv.discountPercent || 0)) / 100;
+    const total = sub + tax - discount;
+    return { sub, tax, discount, total };
   };
 
   const counts = useMemo(
@@ -142,72 +188,98 @@ export default function Billing() {
       invoices.reduce((acc, i) => {
         acc[i.status] = (acc[i.status] || 0) + 1;
         return acc;
-      }, { Draft: 0, Issued: 0, Paid: 0, Void: 0 }),
+      }, { Draft: 0, Issued: 0, Paid: 0 }),
     [invoices]
   );
 
   const setStatus = (id, status) =>
     setInvoices((p) =>
-      p.map((inv) =>
-        inv.id === id
-          ? {
-              ...inv,
-              status,
-              issuedOn:
-                status === "Issued"
-                  ? new Date().toISOString().slice(0, 10)
-                  : inv.issuedOn,
-            }
-          : inv
-      )
+      p.map((inv) => {
+        if (inv.id !== id) return inv;
+        if (inv.status === "Paid" && status === "Issued") {
+          return inv;
+        }
+        return {
+          ...inv,
+          status,
+          issuedOn:
+            status === "Issued"
+              ? new Date().toISOString().slice(0, 10)
+              : inv.issuedOn,
+        };
+      })
     );
 
   useEffect(() => {
     document.body.style.fontFamily =
       'Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial';
+    document.body.style.backgroundColor = "#ffffff";
   }, []);
 
   return (
     <div className="billing-root">
       <style>{`
-        :root{--accent:#0b5ed7;--muted:#6c757d}
-        .billing-root{max-width:1200px;margin:22px auto;padding:18px}
+        :root{--accent:#00aaff;--muted:#6c757d}
+        body { background-color: #ffffff; }
+        .billing-root{max-width:1200px;margin:22px auto;padding:18px; background: #ffffff; }
         .header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
         .title h2{margin:0;color:var(--accent);letter-spacing:0.2px}
         .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
         .controls{display:flex;gap:10px;align-items:center}
-        .btn{border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px}
-        .btn.primary{background:linear-gradient(90deg,var(--accent),#007bff);color:#fff;box-shadow:0 8px 30px rgba(11,94,215,0.12)}
+        .btn{border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px;color:var(--accent)}
+        .btn.primary{background:linear-gradient(90deg,var(--accent),#00bfff);color:#fff;box-shadow:0 8px 30px rgba(0,170,255,0.12)}
         .btn.ghost{background:transparent;border:1px solid #e6eefc;color:var(--accent)}
-        .panel{background:linear-gradient(180deg,#fff,#fbfdff);padding:16px;border-radius:12px;box-shadow:0 12px 40px rgba(12,18,41,0.06)}
+        .panel{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e6eefc;}
         .table-wrap{overflow-x:auto;margin-top:10px}
         table{width:100%;border-collapse:collapse;min-width:720px}
         th{background:#f7f9fc;color:var(--accent);font-weight:700;padding:12px;border-bottom:1px solid #eef2f7;text-align:left}
         td{padding:12px;border-bottom:1px solid #f3f6f9;vertical-align:top}
         .action-group{display:flex;gap:8px;flex-wrap:wrap}
-        .modal-overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(10,12,20,0.45), rgba(3,4,6,0.45));display:flex;align-items:center;justify-content:center;z-index:1200;padding:20px}
-        .modal{width:100%;max-width:980px;background:rgba(255,255,255,0.98);backdrop-filter:blur(6px);border-radius:14px;padding:18px;position:relative;box-shadow:0 30px 80px rgba(11,32,70,0.18);max-height:90vh;overflow-y:auto}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1200;padding:20px}
+        .modal{width:100%;max-width:980px;background:#ffffff;border-radius:14px;padding:18px;position:relative;box-shadow:0 30px 80px rgba(11,32,70,0.18);max-height:90vh;overflow-y:auto}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px; margin-bottom: 16px;}
+        .modal-header h3 { color: var(--accent); margin: 0; }
         .modal-body{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-top:14px}
         .left{display:flex;flex-direction:column;gap:12px}
         .service-row{display:grid;grid-template-columns: 1fr 84px 1fr 48px;gap:10px;align-items:center}
-        .service-row input[type="text"], .service-row input[type="number"], .job-customer, .job-notes{width:100%;padding:10px;border-radius:10px;border:1px solid #eef2f7;font-size:14px;outline:none}
+        .service-row input[type="text"], .service-row input[type="number"], .job-customer, .job-notes{width:100%;padding:10px;border-radius:8px;border:1px solid #eef2f7;font-size:14px;outline:none; background: #fff; }
         .add-service{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-        .right{background:#f9fbff;padding:14px;border-radius:10px;height:100%}
-        .summary-row{display:flex;justify-content:space-between;padding:8px 0}
+        .right{background:#f9fbff;padding:14px;border-radius:10px;height:fit-content}
+        .right h4 { color: var(--accent); margin-top: 0; }
+        .summary-row{display:flex;justify-content:space-between;padding:8px 0; border-bottom: 1px solid #f3f6f9;}
         .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-        .total-bubble{position:absolute;right:22px;bottom:22px;background:linear-gradient(90deg,#0b5ed7,#00a0ff);color:white;padding:12px 18px;border-radius:12px;font-weight:800;box-shadow:0 8px 28px rgba(11,94,215,0.18);display:flex;flex-direction:column;align-items:flex-end;min-width:180px}
+        .total-bubble{background:linear-gradient(90deg,var(--accent),#00bfff);color:white;padding:12px 18px;border-radius:12px;font-weight:800;box-shadow:0 8px 28px rgba(0,170,255,0.18);display:flex;flex-direction:column;align-items:flex-end;min-width:180px; margin-top: 16px;}
         .muted{color:var(--muted);font-size:13px}
         .service-desc{font-weight:600}
+        .tax-discount-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+        .tax-discount-fields input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #eef2f7; font-size: 14px; outline: none; background: #fff; }
+        
         @media (max-width:920px){
           .modal-body{grid-template-columns:1fr;gap:14px}
           .total-bubble{position:static;margin-top:12px}
         }
-        @media (max-width:600px){
+        @media (max-width:768px){
+          .header { flex-direction: column; align-items: flex-start; }
+          .controls { width: 100%; justify-content: space-between; }
+          .action-group { justify-content: center; }
           .service-row{grid-template-columns:1fr 70px 1fr 40px}
+          .tax-discount-fields { grid-template-columns: 1fr; }
+        }
+        @media (max-width:600px){
+          .billing-root { padding: 12px; }
+          .service-row{grid-template-columns:1fr 60px 1fr 36px; gap: 6px;}
+          .service-row input { padding: 8px; font-size: 13px; }
+          .btn { padding: 8px 12px; font-size: 13px; }
+          .modal { padding: 12px; }
+        }
+        @media (max-width:480px){
+          .service-row{grid-template-columns:1fr 50px 80px 36px}
+          .action-group { flex-direction: column; }
+          .action-group .btn { width: 100%; justify-content: center; }
         }
         @media (max-width:400px){
-          .service-row{grid-template-columns:1fr 60px 1fr 36px}
+          .service-row{grid-template-columns:1fr 40px 70px 32px}
+          .service-row input { padding: 6px; font-size: 12px; }
         }
       `}</style>
 
@@ -224,6 +296,7 @@ export default function Billing() {
                 currencyOptions.find((c) => c.code === e.target.value)
               )
             }
+            style={{ padding: "10px", borderRadius: "8px", border: "1px solid #eef2f7" }}
           >
             {currencyOptions.map((c) => (
               <option key={c.code} value={c.code}>
@@ -261,14 +334,18 @@ export default function Billing() {
                   <td>{currencyFormatter(t.total)}</td>
                   <td>
                     <div className="action-group">
-                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Issued")}>
-                        <FiFileText /> Issue
+                      <button
+                        className="btn ghost"
+                        onClick={() => setStatus(inv.id, "Issued")}
+                        disabled={inv.status === "Paid"}
+                      >
+                        <FiCheck /> Issue
                       </button>
-                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Paid")}>
+                      <button
+                        className="btn ghost"
+                        onClick={() => setStatus(inv.id, "Paid")}
+                      >
                         <FiCheck /> Paid
-                      </button>
-                      <button className="btn ghost" onClick={() => setStatus(inv.id, "Void")}>
-                        <FiX /> Void
                       </button>
                       <button className="btn ghost">
                         <FiDownload /> Download
@@ -314,14 +391,15 @@ export default function Billing() {
                     <input
                       type="number"
                       placeholder="Qty"
+                      min="1"
                       value={s.qty}
-                      onChange={(e) =>
-                        updateService(s.id, "qty", e.target.value)
-                      }
+                      onChange={(e) => updateService(s.id, "qty", e.target.value)}
                     />
                     <input
                       type="number"
                       placeholder="Cost"
+                      min="0"
+                      step="0.01"
                       value={s.charges}
                       onChange={(e) =>
                         updateService(s.id, "charges", e.target.value)
@@ -342,11 +420,41 @@ export default function Billing() {
                   </button>
                 </div>
 
+                <div className="tax-discount-fields">
+                  <div>
+                    <label htmlFor="tax-rate">Tax Rate (%)</label>
+                    <input
+                      id="tax-rate"
+                      type="number"
+                      placeholder="Tax %"
+                      min="0"
+                      max="100"
+                      value={taxRate}
+                      onChange={(e) => setTaxRate(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="discount">Discount (%)</label>
+                    <input
+                      id="discount"
+                      type="number"
+                      placeholder="Discount %"
+                      min="0"
+                      max="100"
+                      value={discountPercent}
+                      onChange={(e) =>
+                        setDiscountPercent(Number(e.target.value))
+                      }
+                    />
+                  </div>
+                </div>
+
                 <textarea
                   className="job-notes"
                   placeholder="Additional Notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  rows="3"
                 />
               </div>
 
@@ -357,12 +465,16 @@ export default function Billing() {
                   <span>{currencyFormatter(subtotal)}</span>
                 </div>
                 <div className="summary-row">
-                  <span>Tax (0%):</span>
-                  <span>{currencyFormatter(0)}</span>
+                  <span>Tax ({taxRate}%):</span>
+                  <span>{currencyFormatter(taxAmount)}</span>
                 </div>
                 <div className="summary-row">
-                  <strong>Total:</strong>
-                  <strong>{currencyFormatter(subtotal)}</strong>
+                  <span>Discount ({discountPercent}%):</span>
+                  <span>-{currencyFormatter(discountAmount)}</span>
+                </div>
+                <div className="total-bubble">
+                  <div className="muted">TOTAL</div>
+                  <div>{currencyFormatter(total)}</div>
                 </div>
               </div>
             </div>

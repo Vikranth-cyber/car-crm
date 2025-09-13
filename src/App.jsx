@@ -1,4 +1,4 @@
-// App.jsx - Updated with Notifications screen
+// App.jsx - Updated with Profile & ChangePassword
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
@@ -19,9 +19,12 @@ import Reports from "./pages/Reports";
 import StoreRating from "./pages/StoreRating";
 import Settings from "./pages/Settings";
 import Forms from "./pages/Forms";
-
-// ✅ New Notifications page
 import Notifications from "./pages/Notifications";
+import Messages from "./pages/Messages"; 
+
+// New pages
+import Profile from "./pages/Profile";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -46,9 +49,12 @@ function App() {
         <Route path="/store-rating" element={<StoreRating />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/forms" element={<Forms />} />
-
-        {/* ✅ Notifications screen */}
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/messages" element={<Messages />} />
+
+        {/* Account management */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/change-password" element={<ChangePassword />} />
       </Routes>
     </Layout>
   );

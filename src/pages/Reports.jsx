@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function Reports() {
   const [reports] = useState([
-    { id: 1, name: "EoD Sales Report", date: "2025-08-24", type: "Sales" },
+    { id: 1, name: "Daily Sales Report", date: "2025-08-24", type: "Sales" },
     { id: 2, name: "Job Duration Report", date: "2025-08-24", type: "Operations" },
-    { id: 3, name: "Inventory Usage Report", date: "2025-08-24", type: "Inventory" },
-    { id: 4, name: "Customer Ratings Report", date: "2025-08-24", type: "Customer Feedback" },
-    { id: 5, name: "Re-Image Tracker Report", date: "2025-08-24", type: "Operations" },
-    { id: 6, name: "Weekly Sales Conversion Ratios", date: "2025-08-24", type: "Sales" },
+    { id: 3, name: "Jobs Completed Report", date: "2025-08-24", type: "Operations" },
+    { id: 4, name: "Custom Sales Report", date: "2025-08-24", type: "Sales" },
   ]);
 
   const [scheduleModal, setScheduleModal] = useState(false);
+  const [customDateModal, setCustomDateModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [emailData, setEmailData] = useState({
     frequency: "weekly",
@@ -18,14 +17,40 @@ export default function Reports() {
     time: "09:00",
     dayOfWeek: "monday"
   });
+  
+  const [dateRange, setDateRange] = useState({
+    startDate: "",
+    endDate: ""
+  });
 
-  const handleExport = (format) => {
-    alert(`Exporting to ${format.toUpperCase()} format`);
+  // responsive grid adjustment
+  const [gridColumns, setGridColumns] = useState("1fr");
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setGridColumns("repeat(2, 1fr)"); // 2x2 grid on desktop
+      } else {
+        setGridColumns("1fr"); // single column on smaller screens
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleExport = (report, format) => {
+    alert(`Exporting ${report.name} to ${format.toUpperCase()} format`);
   };
 
   const handleSchedule = (report) => {
     setSelectedReport(report);
     setScheduleModal(true);
+  };
+  
+  const handleCustomDate = (report) => {
+    setSelectedReport(report);
+    setCustomDateModal(true);
   };
 
   const submitSchedule = () => {
@@ -38,21 +63,26 @@ export default function Reports() {
       dayOfWeek: "monday"
     });
   };
+  
+  const generateCustomReport = () => {
+    if (!dateRange.startDate || !dateRange.endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+    
+    alert(`Generating custom ${selectedReport.name} from ${dateRange.startDate} to ${dateRange.endDate}`);
+    setCustomDateModal(false);
+    setDateRange({
+      startDate: "",
+      endDate: ""
+    });
+  };
 
   return (
     <div style={containerStyle}>
       <h2 style={headerStyle}>Reports Dashboard</h2>
       
-      <div style={buttonGroupStyle}>
-        <button style={primaryButtonStyle} onClick={() => handleExport('csv')}>
-          Export CSV
-        </button>
-        <button style={primaryButtonStyle} onClick={() => handleExport('pdf')}>
-          Export PDF
-        </button>
-      </div>
-
-      <div style={cardContainerStyle}>
+      <div style={{ ...cardContainerStyle, gridTemplateColumns: gridColumns }}>
         {reports.map(report => (
           <div key={report.id} style={cardStyle}>
             <div style={cardHeaderStyle}>
@@ -60,14 +90,33 @@ export default function Reports() {
               <span style={badgeStyle}>{report.type}</span>
             </div>
             <p style={cardDateStyle}>Generated: {report.date}</p>
+            
             <div style={cardActionsStyle}>
-              <button style={secondaryButtonStyle} onClick={() => handleExport('csv')}>Download</button>
-              <button style={tertiaryButtonStyle} onClick={() => handleSchedule(report)}>Schedule</button>
+              <button style={generateButtonStyle} onClick={() => 
+                report.name === "Custom Sales Report" ? handleCustomDate(report) : handleExport(report, 'csv')
+              }>
+                Generate
+              </button>
+              
+              <button 
+                style={pdfButtonStyle} 
+                onClick={() => handleExport(report, 'pdf')}
+              >
+                Generate as PDF
+              </button>
+              
+              <button style={scheduleButtonStyle} onClick={() => handleSchedule(report)}>
+                <svg style={iconStyle} viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="currentColor" d="M12,20A7,7 0 0,1 5,13A7,7 0 0,1 12,6A7,7 0 0,1 19,13A7,7 0 0,1 12,20M12,4A9,9 0 0,0 3,13A9,9 0 0,0 12,22A9,9 0 0,0 21,13A9,9 0 0,0 12,4M12.5,8H11V14L15.75,16.85L16.5,15.62L12.5,13.25V8M7.88,3.39L6.6,1.86L2,5.71L3.29,7.24L7.88,3.39M22,5.72L17.4,1.86L16.11,3.39L20.71,7.25L22,5.72Z" />
+                </svg>
+                Schedule
+              </button>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Schedule Modal */}
       {scheduleModal && (
         <div style={modalOverlayStyle}>
           <div style={modalStyle}>
@@ -131,119 +180,165 @@ export default function Reports() {
           </div>
         </div>
       )}
+      
+      {/* Custom Date Modal */}
+      {customDateModal && (
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <h3 style={modalHeaderStyle}>Custom Date Range: {selectedReport?.name}</h3>
+            
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>Start Date</label>
+              <input
+                type="date"
+                style={inputStyle}
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+              />
+            </div>
+
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>End Date</label>
+              <input
+                type="date"
+                style={inputStyle}
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+              />
+            </div>
+
+            <div style={modalActionsStyle}>
+              <button style={cancelButtonStyle} onClick={() => setCustomDateModal(false)}>Cancel</button>
+              <button style={confirmButtonStyle} onClick={generateCustomReport}>Generate Report</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // Styles
 const containerStyle = {
-  padding: '1.5rem',
-  backgroundColor: '#fff',
+  padding: '2rem',
+  backgroundColor: '#ffffff',
   minHeight: '100vh',
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   boxSizing: 'border-box'
 };
 
 const headerStyle = {
-  color: '#007BFF',
-  marginBottom: '1.5rem',
-  fontWeight: '700',
-  fontSize: '1.8rem',
-  textAlign: 'center'
-};
-
-const buttonGroupStyle = {
-  display: 'flex',
-  gap: '1rem',
+  color: '#00aaff',
   marginBottom: '2rem',
-  flexWrap: 'wrap',
-  justifyContent: 'center'
-};
-
-const primaryButtonStyle = {
-  padding: '0.75rem 1.5rem',
-  borderRadius: '8px',
-  border: 'none',
-  backgroundColor: '#007BFF',
-  color: 'white',
-  fontWeight: '600',
-  cursor: 'pointer'
-};
-
-const secondaryButtonStyle = {
-  padding: '0.5rem 1rem',
-  borderRadius: '6px',
-  border: '1px solid #007BFF',
-  backgroundColor: 'transparent',
-  color: '#007BFF',
-  fontWeight: '500',
-  cursor: 'pointer'
-};
-
-const tertiaryButtonStyle = {
-  padding: '0.5rem 1rem',
-  borderRadius: '6px',
-  border: '1px solid #95a5a6',
-  backgroundColor: 'transparent',
-  color: '#7f8c8d',
-  fontWeight: '500',
-  cursor: 'pointer'
+  fontWeight: '700',
+  fontSize: '2rem',
+  textAlign: 'center'
 };
 
 const cardContainerStyle = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-  gap: '1.5rem',
-  justifyContent: 'center'
+  gap: '2rem',
+  maxWidth: '1200px',
+  margin: '0 auto'
 };
 
 const cardStyle = {
   backgroundColor: 'white',
   borderRadius: '12px',
-  padding: '1.5rem',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+  padding: '2rem',
+  boxShadow: '0 6px 15px rgba(0,0,0,0.08)',
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  minHeight: '220px',
+  border: '1px solid #eaeaea'
 };
 
 const cardHeaderStyle = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
-  marginBottom: '1rem'
+  marginBottom: '1.2rem'
 };
 
 const cardTitleStyle = {
   margin: '0',
-  fontSize: '1.1rem',
+  fontSize: '1.4rem',
   fontWeight: '600',
-  color: '#2c3e50',
+  color: '#00aaff',
   flex: 1
 };
 
 const badgeStyle = {
   backgroundColor: '#ecf0f1',
   color: '#7f8c8d',
-  padding: '0.25rem 0.5rem',
-  borderRadius: '12px',
-  fontSize: '0.75rem',
+  padding: '0.4rem 0.8rem',
+  borderRadius: '20px',
+  fontSize: '0.85rem',
   fontWeight: '600',
-  marginLeft: '0.5rem'
+  marginLeft: '0.8rem'
 };
 
 const cardDateStyle = {
   color: '#95a5a6',
-  fontSize: '0.9rem',
-  margin: '0 0 1.5rem 0'
+  fontSize: '0.95rem',
+  margin: '0 0 2rem 0'
 };
 
 const cardActionsStyle = {
   display: 'flex',
-  gap: '0.5rem',
-  marginTop: 'auto'
+  gap: '0.8rem',
+  marginTop: 'auto',
+  alignItems: 'center',
+  flexWrap: 'wrap'
 };
 
-// Modal
+const generateButtonStyle = {
+  padding: '0.7rem 1.4rem',
+  borderRadius: '6px',
+  border: 'none',
+  backgroundColor: '#00aaff',
+  color: 'white',
+  fontWeight: '600',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  flexShrink: 0
+};
+
+const pdfButtonStyle = {
+  padding: '0.7rem 1.2rem',
+  borderRadius: '6px',
+  border: '1px solid #e74c3c',
+  backgroundColor: 'transparent',
+  color: '#e74c3c',
+  fontWeight: '600',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem'
+};
+
+const scheduleButtonStyle = {
+  padding: '0.6rem 1rem',
+  borderRadius: '6px',
+  border: '1px solid #ddd',
+  backgroundColor: 'transparent',
+  color: '#7f8c8d',
+  fontWeight: '500',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  marginLeft: 'auto'
+};
+
+const iconStyle = {
+  display: 'block'
+};
+
+// Modal styles
 const modalOverlayStyle = {
   position: 'fixed',
   top: 0,
@@ -261,31 +356,33 @@ const modalOverlayStyle = {
 const modalStyle = {
   backgroundColor: 'white',
   borderRadius: '12px',
-  padding: '2rem',
+  padding: '2.5rem',
   width: '100%',
   maxWidth: '500px',
   boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
 };
 
 const modalHeaderStyle = {
-  margin: '0 0 1.5rem 0',
-  color: '#2c3e50',
-  fontSize: '1.4rem',
+  margin: '0 0 1.8rem 0',
+  color: '#00aaff',
+  fontSize: '1.5rem',
   fontWeight: '600'
 };
 
-const formGroupStyle = { marginBottom: '1.2rem' };
+const formGroupStyle = { 
+  marginBottom: '1.5rem' 
+};
 
 const labelStyle = {
   display: 'block',
-  marginBottom: '0.5rem',
+  marginBottom: '0.6rem',
   fontWeight: '500',
   color: '#34495e'
 };
 
 const inputStyle = {
   width: '100%',
-  padding: '0.75rem',
+  padding: '0.8rem',
   borderRadius: '6px',
   border: '1px solid #ddd',
   fontSize: '1rem',
@@ -296,12 +393,12 @@ const modalActionsStyle = {
   display: 'flex',
   justifyContent: 'flex-end',
   gap: '1rem',
-  marginTop: '1.5rem',
+  marginTop: '2rem',
   flexWrap: 'wrap'
 };
 
 const cancelButtonStyle = {
-  padding: '0.75rem 1.5rem',
+  padding: '0.8rem 1.6rem',
   borderRadius: '6px',
   border: '1px solid #95a5a6',
   backgroundColor: 'transparent',
@@ -311,7 +408,7 @@ const cancelButtonStyle = {
 };
 
 const confirmButtonStyle = {
-  padding: '0.75rem 1.5rem',
+  padding: '0.8rem 1.6rem',
   borderRadius: '6px',
   border: 'none',
   backgroundColor: '#28a745',

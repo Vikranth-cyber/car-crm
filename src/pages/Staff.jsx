@@ -12,8 +12,15 @@ import {
   FiStar,
   FiRefreshCw,
   FiX,
+  FiUser,
+  FiPhone,
+  FiMail,
+  FiLock,
+  FiBriefcase,
+  FiCreditCard,
   FiDollarSign,
-  FiCalendar,
+  FiEye,
+  FiEyeOff
 } from "react-icons/fi";
 
 export default function Staff() {
@@ -31,8 +38,8 @@ export default function Staff() {
       reimageJobs: 12, 
       wageType: "Monthly", 
       wageRate: 50000,
-      attendanceHours: 0,
-      deductions: 0
+      firstName: "Amit",
+      lastName: "Kumar"
     },
     { 
       id: "EMP002", 
@@ -47,8 +54,8 @@ export default function Staff() {
       reimageJobs: 8, 
       wageType: "Hourly", 
       wageRate: 250,
-      attendanceHours: 160,
-      deductions: 0
+      firstName: "Ravi",
+      lastName: "Teja"
     },
   ];
 
@@ -66,20 +73,20 @@ export default function Staff() {
   const [staff, setStaff] = useState(initialStaff);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [showPayrollModal, setShowPayrollModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [payrollData, setPayrollData] = useState({
-    attendanceHours: 0,
-    deductions: 0
-  });
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     role: "",
     mobile: "",
     email: "",
+    sin: "",
     wageType: "Monthly",
     wageRate: "",
+    password: "",
+    confirmPassword: ""
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -95,14 +102,6 @@ export default function Staff() {
     }
   };
 
-  const calculateSalary = (employee) => {
-    if (employee.wageType === "Hourly") {
-      return employee.wageRate * (employee.attendanceHours || 0);
-    } else {
-      return employee.wageRate - (employee.deductions || 0);
-    }
-  };
-
   const filteredStaff = staff.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,53 +111,44 @@ export default function Staff() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    
     const newEmployee = {
       id: "EMP" + (staff.length + 1).toString().padStart(3, "0"),
-      ...formData,
+      name: `${formData.firstName} ${formData.lastName}`,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role,
+      mobile: formData.mobile,
+      email: formData.email,
+      sin: formData.sin,
+      wageType: formData.wageType,
+      wageRate: formData.wageRate,
       status: "Available",
       jobs: [],
       avgJobTime: "-",
       qualityScore: "-",
-      reimageJobs: 0,
-      attendanceHours: 0,
-      deductions: 0
+      reimageJobs: 0
     };
     setStaff([...staff, newEmployee]);
     setFormData({
-      name: "",
+      firstName: "",
+      lastName: "",
       role: "",
       mobile: "",
       email: "",
+      sin: "",
       wageType: "Monthly",
       wageRate: "",
+      password: "",
+      confirmPassword: ""
     });
     setShowForm(false);
-  };
-
-  const handlePayrollSubmit = (e) => {
-    e.preventDefault();
-    const updatedStaff = staff.map(emp => {
-      if (emp.id === selectedEmployee.id) {
-        return {
-          ...emp,
-          attendanceHours: payrollData.attendanceHours,
-          deductions: payrollData.deductions
-        };
-      }
-      return emp;
-    });
-    setStaff(updatedStaff);
-    setShowPayrollModal(false);
-    setPayrollData({ attendanceHours: 0, deductions: 0 });
-  };
-
-  const openPayrollModal = (employee) => {
-    setSelectedEmployee(employee);
-    setPayrollData({
-      attendanceHours: employee.attendanceHours || 0,
-      deductions: employee.deductions || 0
-    });
-    setShowPayrollModal(true);
   };
 
   return (
@@ -202,7 +192,6 @@ export default function Staff() {
               <th style={styles.th}>Status</th>
               <th style={styles.th}>Assigned Jobs</th>
               <th style={styles.th}>Performance</th>
-              <th style={styles.th}>Salary</th>
               <th style={styles.th}>Actions</th>
             </tr>
           </thead>
@@ -277,19 +266,6 @@ export default function Staff() {
                   </div>
                 </td>
                 <td style={styles.td}>
-                  <div style={styles.salaryContainer}>
-                    <div style={styles.salaryAmount}>
-                      ₹{calculateSalary(s).toLocaleString('en-IN')}
-                    </div>
-                    <button 
-                      style={styles.payrollButton}
-                      onClick={() => openPayrollModal(s)}
-                    >
-                      <FiDollarSign size={14} />
-                    </button>
-                  </div>
-                </td>
-                <td style={styles.td}>
                   <div style={styles.actionButtons}>
                     <button style={styles.editButton}>
                       <FiEdit size={16} />
@@ -313,169 +289,220 @@ export default function Staff() {
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
-              <h2 style={{ margin: 0 }}>Employee Onboarding</h2>
+              <h2 style={{ margin: 0, color: "#2563eb" }}>Employee Onboarding</h2>
               <button style={styles.closeBtn} onClick={() => setShowForm(false)}>
                 <FiX size={18} />
               </button>
             </div>
+            
             <form style={styles.form} onSubmit={handleFormSubmit}>
-              <input
-                type="text"
-                placeholder="Full Name"
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Role"
-                required
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Mobile"
-                required
-                value={formData.mobile}
-                onChange={(e) =>
-                  setFormData({ ...formData, mobile: e.target.value })
-                }
-                style={styles.input}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                style={styles.input}
-              />
-              <select
-                value={formData.wageType}
-                onChange={(e) =>
-                  setFormData({ ...formData, wageType: e.target.value })
-                }
-                style={styles.input}
-              >
-                <option value="Monthly">Monthly</option>
-                <option value="Hourly">Hourly</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Wage Rate (₹)"
-                required
-                value={formData.wageRate}
-                onChange={(e) =>
-                  setFormData({ ...formData, wageRate: e.target.value })
-                }
-                style={styles.input}
-              />
-              <button type="submit" style={styles.submitBtn}>
-                Save Employee
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Payroll Modal */}
-      {showPayrollModal && selectedEmployee && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <div style={styles.modalHeader}>
-              <h2 style={{ margin: 0 }}>Payroll Calculation</h2>
-              <button style={styles.closeBtn} onClick={() => setShowPayrollModal(false)}>
-                <FiX size={18} />
-              </button>
-            </div>
-            <div style={styles.employeePayrollHeader}>
-              <div style={styles.avatar}>{selectedEmployee.name.charAt(0)}</div>
-              <div>
-                <div style={styles.name}>{selectedEmployee.name}</div>
-                <div style={styles.id}>ID: {selectedEmployee.id}</div>
-              </div>
-            </div>
-            
-            <div style={styles.payrollDetails}>
-              <div style={styles.payrollRow}>
-                <span style={styles.payrollLabel}>Wage Type:</span>
-                <span style={styles.payrollValue}>{selectedEmployee.wageType}</span>
-              </div>
-              <div style={styles.payrollRow}>
-                <span style={styles.payrollLabel}>Wage Rate:</span>
-                <span style={styles.payrollValue}>
-                  {selectedEmployee.wageType === "Hourly" 
-                    ? `₹${selectedEmployee.wageRate}/hr` 
-                    : `₹${selectedEmployee.wageRate}/month`
-                  }
-                </span>
-              </div>
-            </div>
-            
-            <form style={styles.form} onSubmit={handlePayrollSubmit}>
-              {selectedEmployee.wageType === "Hourly" ? (
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    <FiClock style={{ marginRight: "8px" }} />
-                    Attendance Hours (Confirmed)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={payrollData.attendanceHours}
-                    onChange={(e) => setPayrollData({
-                      ...payrollData, 
-                      attendanceHours: parseInt(e.target.value) || 0
-                    })}
-                    style={styles.input}
-                    min="0"
-                  />
+              <div style={styles.formSection}>
+                <h3 style={styles.sectionTitle}>Personal Information</h3>
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiUser style={styles.inputIcon} />
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="Enter first name"
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiUser style={styles.inputIcon} />
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="Enter last name"
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    <FiCalendar style={{ marginRight: "8px" }} />
-                    Deductions (Unpaid Leaves, etc.)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={payrollData.deductions}
-                    onChange={(e) => setPayrollData({
-                      ...payrollData, 
-                      deductions: parseInt(e.target.value) || 0
-                    })}
-                    style={styles.input}
-                    min="0"
-                    max={selectedEmployee.wageRate}
-                  />
-                </div>
-              )}
-              
-              <div style={styles.salaryPreview}>
-                <div style={styles.payrollRow}>
-                  <span style={styles.payrollLabel}>Calculated Salary:</span>
-                  <span style={styles.salaryAmountPreview}>
-                    ₹{selectedEmployee.wageType === "Hourly" 
-                      ? (selectedEmployee.wageRate * payrollData.attendanceHours).toLocaleString('en-IN')
-                      : (selectedEmployee.wageRate - payrollData.deductions).toLocaleString('en-IN')
-                    }
-                  </span>
+                
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiBriefcase style={styles.inputIcon} />
+                      Role/Position
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="e.g. Admin, Worker"
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiCreditCard style={styles.inputIcon} />
+                      SIN Number
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.sin}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sin: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="123-456-789"
+                    />
+                  </div>
                 </div>
               </div>
               
+              <div style={styles.formSection}>
+                <h3 style={styles.sectionTitle}>Contact Information</h3>
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiPhone style={styles.inputIcon} />
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.mobile}
+                      onChange={(e) =>
+                        setFormData({ ...formData, mobile: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="+1 234 567 8900"
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiMail style={styles.inputIcon} />
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder="employee@company.com"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div style={styles.formSection}>
+                <h3 style={styles.sectionTitle}>Account Credentials</h3>
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiLock style={styles.inputIcon} />
+                      Password
+                    </label>
+                    <div style={styles.passwordContainer}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
+                        style={{...styles.input, border: 'none', padding: 0}}
+                        placeholder="Create a password"
+                      />
+                      <button 
+                        type="button" 
+                        style={styles.passwordToggle}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <FiEyeOff /> : <FiEye />}
+                      </button>
+                    </div>
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiLock style={styles.inputIcon} />
+                      Confirm Password
+                    </label>
+                    <div style={styles.passwordContainer}>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        value={formData.confirmPassword}
+                        onChange={(e) =>
+                          setFormData({ ...formData, confirmPassword: e.target.value })
+                        }
+                        style={{...styles.input, border: 'none', padding: 0}}
+                        placeholder="Confirm your password"
+                      />
+                      <button 
+                        type="button" 
+                        style={styles.passwordToggle}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={styles.formSection}>
+                <h3 style={styles.sectionTitle}>Compensation</h3>
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiDollarSign style={styles.inputIcon} />
+                      Wage Type
+                    </label>
+                    <select
+                      value={formData.wageType}
+                      onChange={(e) =>
+                        setFormData({ ...formData, wageType: e.target.value })
+                      }
+                      style={styles.input}
+                    >
+                      <option value="Monthly">Monthly</option>
+                      <option value="Hourly">Hourly</option>
+                    </select>
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      <FiDollarSign style={styles.inputIcon} />
+                      Wage Rate
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.wageRate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, wageRate: e.target.value })
+                      }
+                      style={styles.input}
+                      placeholder={formData.wageType === "Hourly" ? "Hourly rate" : "Monthly salary"}
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <button type="submit" style={styles.submitBtn}>
-                <FiDollarSign size={18} style={{ marginRight: "8px" }} />
-                Update Payroll
+                Create Employee Account
               </button>
             </form>
           </div>
@@ -501,13 +528,13 @@ const styles = {
     marginBottom: "24px",
   },
   title: {
-    color: "#0f172a",
+    color: "#00aaff",
     fontSize: "28px",
     fontWeight: 700,
     margin: 0,
   },
   addButton: {
-    background: "#2563eb",
+    background: "linear-gradient(135deg, #00aaff 0%, #00aaff 100%)",
     color: "#fff",
     border: "none",
     padding: "12px 20px",
@@ -547,6 +574,7 @@ const styles = {
     border: "1px solid #e2e8f0",
     fontSize: "14px",
     boxSizing: "border-box",
+    background: "#f8fafc",
   },
   filterButton: {
     background: "transparent",
@@ -596,7 +624,7 @@ const styles = {
     width: "40px",
     height: "40px",
     borderRadius: "50%",
-    background: "#2563eb",
+    background: "#00aaff",
     color: "white",
     display: "flex",
     alignItems: "center",
@@ -613,7 +641,7 @@ const styles = {
   jobsContainer: { display: "flex", flexDirection: "column", gap: "8px" },
   jobTag: {
     background: "#e0f2fe",
-    color: "#0369a1",
+    color: "#00aaff",
     padding: "6px 10px",
     borderRadius: "6px",
     fontSize: "12px",
@@ -624,32 +652,10 @@ const styles = {
   noJobs: { color: "#94a3b8", fontStyle: "italic", fontSize: "13px" },
   performance: { display: "flex", flexDirection: "column", gap: "8px" },
   metric: { display: "flex", alignItems: "center", fontSize: "13px", color: "#475569" },
-  salaryContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "8px",
-  },
-  salaryAmount: {
-    fontWeight: 600,
-    color: "#059669",
-    fontSize: "14px",
-  },
-  payrollButton: {
-    background: "#e0f2fe",
-    color: "#0369a1",
-    border: "none",
-    padding: "6px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   actionButtons: { display: "flex", gap: "8px" },
   editButton: {
     background: "#e0f2fe",
-    color: "#0369a1",
+    color: "#00aaff",
     border: "none",
     padding: "8px",
     borderRadius: "6px",
@@ -682,96 +688,110 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
+    padding: "16px",
+    boxSizing: "border-box",
   },
   modal: {
     background: "#fff",
     borderRadius: "16px",
-    padding: "24px",
+    padding: "0",
     width: "100%",
-    maxWidth: "500px",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.2)",
+    maxWidth: "700px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
   },
   modalHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
+    padding: "24px 24px 16px",
+    borderBottom: "1px solid #e2e8f0",
   },
   closeBtn: {
     background: "transparent",
     border: "none",
     cursor: "pointer",
     color: "#64748b",
+    padding: "4px",
+    borderRadius: "4px",
   },
-  form: { display: "flex", flexDirection: "column", gap: "16px" },
-  input: {
-    padding: "12px",
-    borderRadius: "8px",
+  form: {
+    padding: "24px",
+  },
+  formSection: {
+    marginBottom: "24px",
+    padding: "20px",
+    background: "#f8fafc",
+    borderRadius: "12px",
     border: "1px solid #e2e8f0",
-    fontSize: "14px",
   },
-  submitBtn: {
-    background: "#2563eb",
-    color: "#fff",
-    padding: "12px",
-    border: "none",
-    borderRadius: "8px",
+  sectionTitle: {
+    color: "#00aaff",
+    fontSize: "18px",
     fontWeight: 600,
+    margin: "0 0 16px 0",
+  },
+  row: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "16px",
+    marginBottom: "16px",
+  },
+  inputGroup: {
+    flex: "1",
+    minWidth: "250px",
+  },
+  label: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "14px",
+    fontWeight: 500,
+    color: "#374151",
+    marginBottom: "8px",
+  },
+  inputIcon: {
+    marginRight: "8px",
+    color: "#64748b",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    fontSize: "14px",
+    boxSizing: "border-box",
+    background: "#fff",
+    transition: "all 0.2s ease",
+  },
+  passwordContainer: {
+    display: "flex",
+    alignItems: "center",
+    padding: "12px 16px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    background: "#fff",
+  },
+  passwordToggle: {
+    background: "transparent",
+    border: "none",
     cursor: "pointer",
+    color: "#64748b",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
-  employeePayrollHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "20px",
-    padding: "12px",
-    background: "#f8fafc",
+  submitBtn: {
+    background: "linear-gradient(135deg, #00aaff 0%, #00aaff 100%)",
+    color: "#fff",
+    padding: "14px 24px",
+    border: "none",
     borderRadius: "8px",
-  },
-  payrollDetails: {
-    padding: "12px",
-    background: "#f8fafc",
-    borderRadius: "8px",
-    marginBottom: "16px",
-  },
-  payrollRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "8px",
-  },
-  payrollLabel: {
-    fontWeight: 500,
-    color: "#475569",
-  },
-  payrollValue: {
     fontWeight: 600,
-    color: "#1e293b",
-  },
-  inputGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  label: {
-    fontSize: "14px",
-    fontWeight: 500,
-    color: "#374151",
-    display: "flex",
-    alignItems: "center",
-  },
-  salaryPreview: {
-    padding: "16px",
-    background: "#ecfdf5",
-    borderRadius: "8px",
-    border: "1px solid #d1fae5",
-  },
-  salaryAmountPreview: {
-    fontWeight: 700,
-    color: "#065f46",
+    cursor: "pointer",
     fontSize: "16px",
-  },
+    width: "100%",
+    boxShadow: "0 4px 12px rgba(37,99,235,0.3)",
+    transition: "all 0.2s ease",
+  }
 };

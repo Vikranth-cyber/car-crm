@@ -1,3 +1,4 @@
+// AdminDashboard.jsx
 import React from "react";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LiveJobsWidget from "../components/dashboard/LiveJobsWidget";
@@ -19,53 +20,107 @@ export default function AdminDashboard() {
         padding: 0,
         width: "100%",
         minHeight: "100vh",
-        backgroundColor: "#fff", // ✅ pure white background
-        color: "#2c3e50",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        backgroundColor: "#ffffff",
+        color: "#00aaff",
+        fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       }}
     >
       <style>{`
+        :root {
+          --radius: 16px;
+          --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+          --brand: #00aaff;
+          --muted: #64748b;
+          --border: #e2e8f0;
+        }
+        
         .dash-wrap {
-          padding: 24px 32px;
-          max-width: 1600px;
+          padding: 28px 32px;
+          max-width: 1800px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
-          gap: 28px;
-          background: #fff;
+          gap: 32px;
+          height: 100%;
+          min-height: calc(100vh - 80px);
         }
+        
         .dash-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
           gap: 16px;
+          padding: 0 8px;
         }
+        
         .dash-header h1 {
           margin: 0;
-          font-weight: 700;
-          font-size: 1.6rem;
-          color: #00aaff; /* dashboard blue */
+          font-weight: 800;
+          font-size: 2rem;
+          background: linear-gradient(135deg, #00aaff, #0088cc);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
+        
         .dash-header-date {
           color: #64748b;
-          font-weight: 500;
+          font-weight: 600;
+          font-size: 1.1rem;
         }
+        
         .dash-grid {
           display: grid;
           grid-template-columns: 2fr 1fr;
-          gap: 28px;
+          gap: 32px;
+          flex: 1;
+          min-height: 0;
+          height: 100%;
         }
+        
+        @media (max-width: 1280px) {
+          .dash-grid {
+            gap: 24px;
+          }
+        }
+        
         @media (max-width: 1024px) {
           .dash-grid {
             grid-template-columns: 1fr;
           }
         }
+        
+        @media (max-width: 768px) {
+          .dash-wrap {
+            padding: 20px 16px;
+            gap: 24px;
+          }
+          
+          .dash-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          
+          .dash-header h1 {
+            font-size: 1.8rem;
+          }
+        }
+        
         .dash-left,
         .dash-right {
           display: flex;
           flex-direction: column;
-          gap: 28px;
+          gap: 32px;
+          min-height: 0;
+          height: 100%;
+        }
+        
+        .dash-left > *, 
+        .dash-right > * {
+          flex: 1;
+          min-height: 0;
+          height: 100%;
         }
       `}</style>
 

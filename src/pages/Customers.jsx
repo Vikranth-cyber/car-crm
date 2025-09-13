@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiSearch, FiUser, FiPhone, FiMail, FiChevronRight, FiX } from "react-icons/fi";
+import { FiSearch, FiUser, FiPhone, FiMail, FiChevronRight, FiX, FiTag } from "react-icons/fi";
 import { FaCar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -13,6 +13,7 @@ export default function Customers() {
       name: "Rahul Sharma",
       mobile: "9876543210",
       email: "rahul@example.com",
+      behaviour: "Loyal",
       vehicles: [{ plate: "MH12AB1234", model: "Honda City", year: "2020" }],
       jobs: [
         { id: "J101", datetime: "2025-09-01 14:30", vehicle: "MH12AB1234", model: "Honda City 2020" },
@@ -24,16 +25,16 @@ export default function Customers() {
       name: "Priya Verma",
       mobile: "9988776655",
       email: "priya@example.com",
+      behaviour: "Occasional",
       vehicles: [{ plate: "TS09XY5678", model: "Hyundai i20", year: "2019" }],
-      jobs: [
-        { id: "J099", datetime: "2025-08-29 11:00", vehicle: "TS09XY5678", model: "Hyundai i20 2019" },
-      ],
+      jobs: [{ id: "J099", datetime: "2025-08-29 11:00", vehicle: "TS09XY5678", model: "Hyundai i20 2019" }],
     },
     {
       id: 3,
       name: "Amit Patel",
       mobile: "8899667744",
       email: "amit@example.com",
+      behaviour: "Frequent",
       vehicles: [
         { plate: "KA03MN7890", model: "Toyota Innova", year: "2021" },
         { plate: "DL10PQ4567", model: "Maruti Swift", year: "2018" },
@@ -133,6 +134,7 @@ export default function Customers() {
                 <h2>{selectedCustomer.name}</h2>
                 <p><FiPhone /> {selectedCustomer.mobile}</p>
                 <p><FiMail /> {selectedCustomer.email}</p>
+                <p className="behaviour"><FiTag /> Behaviour: {selectedCustomer.behaviour}</p>
               </div>
             </div>
 
@@ -186,7 +188,7 @@ export default function Customers() {
           font-size: 28px;
           font-weight: 700;
           margin: 0;
-          color: #0284c7; /* sky blue */
+          color: #00aaff; /* sky blue */
         }
         .header p {
           color: #64748b;
@@ -235,6 +237,9 @@ export default function Customers() {
           border-radius: 12px;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
+        .list-header h2 {
+          color: #00aaff;
+        }
         .list-header {
           display: flex;
           justify-content: space-between;
@@ -259,13 +264,13 @@ export default function Customers() {
         }
         .card.active {
           background: #f0f9ff;
-          border-left: 4px solid #0284c7;
+          border-left: 4px solid #00aaff;
         }
         .avatar {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: #0284c7;
+          background: #00aaff;
           color: white;
           display: flex;
           align-items: center;
@@ -276,6 +281,7 @@ export default function Customers() {
         .info h3 {
           margin: 0 0 4px;
           font-size: 16px;
+          color: #00aaff;
         }
         .info p {
           margin: 2px 0;
@@ -286,7 +292,7 @@ export default function Customers() {
           gap: 6px;
         }
         .vehicles {
-          color: #0284c7;
+          color: #00aaff;
           font-size: 14px;
         }
         .chevron {
@@ -318,6 +324,9 @@ export default function Customers() {
           justify-content: center;
           height: 100%;
         }
+        .details-header h2 {
+          color: #00aaff;
+        }
         .details-header {
           display: flex;
           justify-content: space-between;
@@ -338,11 +347,18 @@ export default function Customers() {
           border-bottom: 1px solid #f1f5f9;
           padding-bottom: 16px;
         }
+        .profile h2 {
+          color: #00aaff;
+        }
+        .behaviour {
+          color: #00aaff;
+          font-weight: 500;
+        }
         .avatar-lg {
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: #0284c7;
+          background: #00aaff;
           color: white;
           display: flex;
           align-items: center;
@@ -354,7 +370,7 @@ export default function Customers() {
           margin: 12px 0;
           font-size: 16px;
           font-weight: 600;
-          color: #1e293b;
+          color: #00aaff;
         }
         .vehicle-card {
           display: flex;
@@ -380,9 +396,10 @@ export default function Customers() {
         .job-header {
           background: #f1f5f9;
           font-weight: 600;
+          color: #00aaff;
         }
         .job-link a {
-          color: #0284c7;
+          color: #00aaff;
           text-decoration: none;
           font-weight: 500;
         }
