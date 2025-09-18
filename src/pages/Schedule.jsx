@@ -1,4 +1,4 @@
-// Schedule.jsx
+
 import React, { useState, useEffect } from "react";
 import {
   FiCalendar,
@@ -127,7 +127,6 @@ export default function Schedule() {
     setWaitlist(waitlist.filter((item) => item.id !== waitlistItem.id));
   };
 
-  // 🎨 Responsive Styling
   const containerStyle = {
     fontFamily: "'Segoe UI', sans-serif",
     backgroundColor: "#ffffff",
@@ -318,7 +317,7 @@ export default function Schedule() {
         </button>
       </div>
 
-      {/* New Booking Form - Always visible on desktop, conditionally on mobile */}
+    
       <div style={{display: isMobile && !showMobileMenu ? "none" : "block"}}>
         <div style={centeredCardStyle}>
           <h3 style={{color: "#00aaff", display: "flex", alignItems: "center", gap: "8px", marginTop: 0}}>
@@ -409,7 +408,6 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* Bookings Table - Always visible on desktop, conditionally on mobile */}
       <div style={{display: isMobile && showMobileMenu ? "none" : "block"}}>
         <div style={centeredCardStyle}>
           <h3 style={{color: "#00aaff", display: "flex", alignItems: "center", gap: "8px", marginTop: 0}}>
@@ -451,7 +449,6 @@ export default function Schedule() {
           </div>
         </div>
 
-        {/* Waitlist */}
         <div style={centeredCardStyle}>
           <h3 style={{color: "#00aaff", display: "flex", alignItems: "center", gap: "8px", marginTop: 0}}>
             <FiAlertTriangle /> Waitlist
@@ -497,7 +494,6 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* Mobile navigation hint */}
       {isMobile && (
         <div style={{textAlign: "center", marginTop: "20px", color: "#666", fontSize: "14px"}}>
           {showMobileMenu ? "View bookings and waitlist" : "Add new booking"}

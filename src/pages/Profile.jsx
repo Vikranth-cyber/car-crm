@@ -1,4 +1,3 @@
-// src/pages/Profile.jsx
 import React, { useState } from "react";
 import {
   FiUser,
@@ -63,7 +62,7 @@ export default function Profile() {
           height: "95%",
         }}
       >
-        {/* Header */}
+       
         <div
           style={{
             background: "linear-gradient(135deg, #00ccff, #00ffaa)",
@@ -109,7 +108,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Edit / Save / Cancel Buttons */}
           <div style={{ display: "flex", gap: "0.5rem" }}>
             {editMode ? (
               <>
@@ -137,7 +135,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Info Section */}
+       
         <div
           style={{
             flex: 1,
@@ -212,7 +210,7 @@ export default function Profile() {
               icon={<FiClock />}
               label="Last Login"
               value={formData.lastLogin}
-              editable={false} // can't edit last login
+              editable={false} 
             />
           </div>
         </div>
@@ -221,7 +219,6 @@ export default function Profile() {
   );
 }
 
-// Reusable Info Card
 function InfoCard({ icon, label, value, editable, name, onChange }) {
   return (
     <div
@@ -281,7 +278,6 @@ function InfoCard({ icon, label, value, editable, name, onChange }) {
   );
 }
 
-// Reusable button style
 const actionButtonStyle = (color) => ({
   display: "flex",
   alignItems: "center",

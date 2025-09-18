@@ -60,7 +60,7 @@ export default function Inventory() {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Derived
+
   const filteredItems = items.filter(
     (item) =>
       item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,7 +70,7 @@ export default function Inventory() {
 
   const lowStock = items.filter((i) => i.stock <= i.reorder);
 
-  // Responsiveness
+
   useEffect(() => {
     const onResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
@@ -79,7 +79,6 @@ export default function Inventory() {
 
   const isMobile = width <= 760;
 
-  // ---------- Functions ----------
   const handleAddItem = () => {
     if (!newItem.sku || !newItem.name) return;
     setItems([...items, { id: Date.now(), ...newItem }]);
@@ -110,7 +109,6 @@ export default function Inventory() {
     );
   };
 
-  // ---------- Inline styles ----------
   const pageStyle = {
     fontFamily:
       "'Inter','Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial",
@@ -240,7 +238,6 @@ export default function Inventory() {
           </div>
         )}
 
-        {/* Add Inventory */}
         <div style={cardStyle}>
           <h2 style={{ fontSize: 18, marginBottom: 14, color: "#00aaff" }}>
             Add Inventory
@@ -285,8 +282,6 @@ export default function Inventory() {
             <FiPlus /> Add Item
           </button>
         </div>
-
-        {/* Inventory Table */}
         <div style={cardStyle}>
           <h2 style={{ fontSize: 18, marginBottom: 14, color: "#00aaff" }}>
             Inventory

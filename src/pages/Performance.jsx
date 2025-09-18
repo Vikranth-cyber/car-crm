@@ -138,7 +138,6 @@ export default function Performance() {
     <div className="performance-container">
       <h2 className="title">Performance Dashboard</h2>
 
-      {/* KPI Cards */}
       <div className="kpi-cards">
         <div className="card blue">
           <FaHourglassHalf size={22} className="icon" />
@@ -160,7 +159,6 @@ export default function Performance() {
         </div>
       </div>
 
-      {/* Top Performers */}
       <div className="section">
         <h3 className="section-title"><FaTrophy className="icon" /> Top Performers</h3>
         <div className="table-container">
@@ -191,7 +189,6 @@ export default function Performance() {
         </div>
       </div>
 
-      {/* Job Evaluation */}
       <div className="section">
         <h3 className="section-title"><FaClipboardList className="icon" /> Job Evaluation</h3>
         <div className="table-container">
@@ -234,7 +231,6 @@ export default function Performance() {
         </div>
       </div>
 
-      {/* Evaluation Modal */}
       {selectedJob && (
         <div className="modal-overlay">
           <div className="modal evaluation-modal">
@@ -312,7 +308,6 @@ export default function Performance() {
         </div>
       )}
 
-      {/* Styling */}
       <style>{`
         body {
           background-color: white;

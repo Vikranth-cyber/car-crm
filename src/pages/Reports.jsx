@@ -23,15 +23,15 @@ export default function Reports() {
     endDate: ""
   });
 
-  // responsive grid adjustment
+  
   const [gridColumns, setGridColumns] = useState("1fr");
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 992) {
-        setGridColumns("repeat(2, 1fr)"); // 2x2 grid on desktop
+        setGridColumns("repeat(2, 1fr)");
       } else {
-        setGridColumns("1fr"); // single column on smaller screens
+        setGridColumns("1fr"); 
       }
     };
     handleResize();
@@ -116,7 +116,7 @@ export default function Reports() {
         ))}
       </div>
 
-      {/* Schedule Modal */}
+   
       {scheduleModal && (
         <div style={modalOverlayStyle}>
           <div style={modalStyle}>
@@ -181,7 +181,6 @@ export default function Reports() {
         </div>
       )}
       
-      {/* Custom Date Modal */}
       {customDateModal && (
         <div style={modalOverlayStyle}>
           <div style={modalStyle}>

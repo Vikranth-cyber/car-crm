@@ -1,5 +1,3 @@
-// StoreRating.jsx — Ultra Premium Single Store Redesign
-// Ensure you installed: npm i recharts react-icons
 
 import React, { useMemo } from "react";
 import {
@@ -18,7 +16,6 @@ import {
 } from "recharts";
 import { FaStar, FaExclamationTriangle } from "react-icons/fa";
 
-// Premium color palette
 const COLORS = ["#5B64D4", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#0088FE"];
 const BACKGROUND_COLOR = "#FFFFFF";
 const CARD_BACKGROUND = "#F9FAFB";
@@ -111,7 +108,7 @@ export default function StoreRating() {
   ];
 
   const trendSeries = trends.map((v, i) => ({ label: `Day ${i + 1}`, rating: v }));
-  const belowThreshold = overall < 4; // ✅ changed from 4.8 to 4
+  const belowThreshold = overall < 4; 
 
   return (
     <div
@@ -129,7 +126,7 @@ export default function StoreRating() {
             fontSize: "28px",
             fontWeight: "700",
             margin: "0 0 8px 0",
-            color: "#38BDF8", // ✅ Sky blue title
+            color: "#38BDF8", 
           }}
         >
           Store Ratings
@@ -139,7 +136,6 @@ export default function StoreRating() {
         </p>
       </header>
 
-      {/* Overall Rating */}
       <div
         style={{
           backgroundColor: CARD_BACKGROUND,
@@ -177,7 +173,6 @@ export default function StoreRating() {
         </div>
       </div>
 
-      {/* Charts — Responsive layout */}
       <div
         style={{
           display: "grid",
@@ -186,7 +181,6 @@ export default function StoreRating() {
           marginBottom: "24px",
         }}
       >
-        {/* Pie Chart */}
         <div
           style={{
             backgroundColor: CARD_BACKGROUND,
@@ -210,7 +204,6 @@ export default function StoreRating() {
           </ResponsiveContainer>
         </div>
 
-        {/* Bar Chart */}
         <div
           style={{
             backgroundColor: CARD_BACKGROUND,
@@ -238,7 +231,6 @@ export default function StoreRating() {
         </div>
       </div>
 
-      {/* Trends */}
       <div
         style={{
           backgroundColor: CARD_BACKGROUND,
@@ -260,7 +252,6 @@ export default function StoreRating() {
         </ResponsiveContainer>
       </div>
 
-      {/* Reviews */}
       <div
         style={{
           backgroundColor: CARD_BACKGROUND,
@@ -295,8 +286,6 @@ export default function StoreRating() {
           ))}
         </div>
       </div>
-
-      {/* Responsive CSS for mobile */}
       <style>
         {`
           @media (max-width: 768px) {

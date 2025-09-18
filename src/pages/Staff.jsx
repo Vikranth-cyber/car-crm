@@ -1,4 +1,4 @@
-// Staff.jsx
+
 import React, { useState } from "react";
 import {
   FiUserPlus,
@@ -92,13 +92,13 @@ export default function Staff() {
     switch (status) {
       case "Present":
       case "Available":
-        return "#10b981"; // green
+        return "#10b981"; 
       case "Busy":
-        return "#f59e0b"; // amber
+        return "#f59e0b"; 
       case "On Leave":
-        return "#ef4444"; // red
+        return "#ef4444"; 
       default:
-        return "#6b7280"; // gray
+        return "#6b7280"; 
     }
   };
 
@@ -112,7 +112,7 @@ export default function Staff() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     
-    // Validate passwords match
+    
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
@@ -161,7 +161,6 @@ export default function Staff() {
         </button>
       </div>
 
-      {/* Search + Filters */}
       <div style={styles.controls}>
         <div style={styles.searchContainer}>
           <FiSearch style={styles.searchIcon} />
@@ -179,7 +178,6 @@ export default function Staff() {
         </button>
       </div>
 
-      {/* Staff Table */}
       <div style={styles.tableContainer}>
         <table style={styles.table}>
           <thead>
@@ -284,7 +282,6 @@ export default function Staff() {
         </table>
       </div>
 
-      {/* Onboarding Modal */}
       {showForm && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>

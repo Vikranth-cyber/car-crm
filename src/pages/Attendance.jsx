@@ -1,4 +1,3 @@
-// Attendance.jsx
 import React, { useState } from "react";
 import {
   FiCheckCircle,
@@ -31,7 +30,6 @@ export default function Attendance() {
   const [newIn, setNewIn] = useState("");
   const [newOut, setNewOut] = useState("");
 
-  // Manager approves/rejects (only if Pending)
   const handleApproval = (id, action) => {
     setRecords((prev) =>
       prev.map((r) =>
@@ -52,7 +50,6 @@ export default function Attendance() {
     );
   };
 
-  // Manager edits (only if Pending)
   const saveEdit = () => {
     if (!selectedEdit) return;
     setRecords((prev) =>
@@ -124,7 +121,6 @@ export default function Attendance() {
               transition: "transform 0.2s",
             }}
           >
-            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -181,7 +177,6 @@ export default function Attendance() {
               ))}
             </div>
 
-            {/* Action buttons (only if Pending) */}
             {rec.status === "Pending" && (
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                 <button
@@ -207,8 +202,6 @@ export default function Attendance() {
                 </button>
               </div>
             )}
-
-            {/* Edit form (only if Pending) */}
             {selectedEdit === rec.id && rec.status === "Pending" && (
               <div
                 style={{
@@ -237,7 +230,6 @@ export default function Attendance() {
               </div>
             )}
 
-            {/* Logs */}
             {rec.tier !== 3 && rec.logs.length > 0 && (
               <div
                 style={{

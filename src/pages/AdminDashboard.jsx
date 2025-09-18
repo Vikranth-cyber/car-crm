@@ -1,4 +1,3 @@
-// AdminDashboard.jsx
 import React from "react";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LiveJobsWidget from "../components/dashboard/LiveJobsWidget";
@@ -125,26 +124,20 @@ export default function AdminDashboard() {
       `}</style>
 
       <div className="dash-wrap">
-        {/* Header */}
+   
         <div className="dash-header">
           <h1>Dashboard Overview</h1>
           <div className="dash-header-date">{today}</div>
         </div>
 
-        {/* KPI Strip */}
         <KpiStrip />
 
-        {/* Quick Actions */}
         <QuickActions />
 
-        {/* Main Grid */}
         <div className="dash-grid">
-          {/* Left Column */}
           <div className="dash-left">
             <LiveJobsWidget />
           </div>
-
-          {/* Right Column */}
           <div className="dash-right">
             <AlertsPanel />
           </div>

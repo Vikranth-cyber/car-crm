@@ -1,9 +1,9 @@
-// Messages.jsx
+
 import React, { useState, useEffect } from "react";
 import { FiSend, FiSearch, FiChevronLeft } from "react-icons/fi";
 
 export default function Messages() {
-  // Static users
+  
   const users = [
     { id: 1, name: "Ravi Kumar" },
     { id: 2, name: "Priya Sharma" },
@@ -15,7 +15,6 @@ export default function Messages() {
     { id: 8, name: "Neha Gupta" },
   ];
 
-  // Static conversations
   const conversations = {
     1: [
       { from: "me", text: "Hi Ravi, how are you?" },
@@ -67,7 +66,6 @@ export default function Messages() {
   const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
   const [showChat, setShowChat] = useState(false);
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
@@ -81,7 +79,6 @@ export default function Messages() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Handle sending message
   const handleSend = () => {
     if (messageInput.trim() === "") return;
 
@@ -115,7 +112,7 @@ export default function Messages() {
       className="messages-container"
       style={{
         display: "flex",
-        height: "calc(100vh - 72px - 3rem)", // Full height minus navbar and padding
+        height: "calc(100vh - 72px - 3rem)",
         backgroundColor: "#fff",
         fontFamily: "'Inter', 'SF Pro Display', -apple-system, sans-serif",
         overflow: "hidden",
@@ -125,7 +122,6 @@ export default function Messages() {
         position: "relative",
       }}
     >
-      {/* Sidebar Users - Hidden on mobile when chat is shown */}
       <div
         className="contacts-sidebar"
         style={{
@@ -249,7 +245,6 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Chat Window - Hidden on mobile when contacts are shown */}
       <div
         className="chat-window"
         style={{
@@ -266,7 +261,6 @@ export default function Messages() {
           }),
         }}
       >
-        {/* Chat Header */}
         <div
           style={{
             borderBottom: "1px solid #e2e8f0",
@@ -319,7 +313,6 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* Chat Messages */}
         <div
           style={{
             flex: 1,
@@ -356,7 +349,6 @@ export default function Messages() {
           ))}
         </div>
 
-        {/* Message Input */}
         <div
           style={{
             borderTop: "1px solid #e2e8f0",
@@ -405,7 +397,6 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Responsive styles */}
       <style>
         {`
           @media (max-width: 768px) {

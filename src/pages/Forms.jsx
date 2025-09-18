@@ -1,6 +1,3 @@
-// Forms.jsx — Ultra Premium Responsive Redesign
-// Ensure you installed: npm i react-icons
-
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -19,7 +16,6 @@ export default function Forms() {
   const params = new URLSearchParams(location.search);
   const type = params.get("type");
 
-  // Shared styles
   const formContainer = {
     maxWidth: "850px",
     margin: "20px auto",
@@ -111,7 +107,6 @@ export default function Forms() {
     justifyContent: "center",
   };
 
-  // ---------- Job Form ----------
   const JobForm = () => (
     <div style={formContainer}>
       <div style={formHeader}>
@@ -178,7 +173,6 @@ export default function Forms() {
     </div>
   );
 
-  // ---------- Employee Form ----------
   const EmployeeForm = () => (
     <div style={formContainer}>
       <div style={formHeader}>
@@ -257,7 +251,6 @@ export default function Forms() {
     </div>
   );
 
-  // -------- Other forms (booking, inventory, delay) remain unchanged --------
   const BookingForm = () => (
     <div style={formContainer}>
       <div style={formHeader}>
@@ -354,7 +347,6 @@ export default function Forms() {
     </div>
   );
 
-  // --------- Default screen ---------
   if (!type) {
     const container = {
       maxWidth: "1100px",
@@ -416,7 +408,6 @@ export default function Forms() {
     );
   }
 
-  // --------- Routes ----------
   if (type === "job") return <JobForm />;
   if (type === "booking") return <BookingForm />;
   if (type === "employee") return <EmployeeForm />;

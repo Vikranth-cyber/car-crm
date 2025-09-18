@@ -1,4 +1,3 @@
-// src/pages/ChangePassword.jsx
 import React from "react";
 import { FiLock } from "react-icons/fi";
 
@@ -12,7 +11,7 @@ export default function ChangePassword() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        overflow: "hidden", // stiff layout
+        overflow: "hidden", 
       }}
     >
       <div
@@ -27,7 +26,7 @@ export default function ChangePassword() {
           height: "95%",
         }}
       >
-        {/* Header */}
+      
         <div
           style={{
             background: "linear-gradient(135deg, #00ccff, #00ffaa)",
@@ -62,7 +61,6 @@ export default function ChangePassword() {
           </h2>
         </div>
 
-        {/* Form Section */}
         <div
           style={{
             flex: 1,
@@ -81,7 +79,6 @@ export default function ChangePassword() {
               gap: "1rem",
             }}
           >
-            {/* Current Password */}
             <div style={{ display: "flex", flexDirection: "column" }}>
               <label
                 style={{
@@ -100,7 +97,6 @@ export default function ChangePassword() {
               />
             </div>
 
-            {/* New Password */}
             <div style={{ display: "flex", flexDirection: "column" }}>
               <label
                 style={{
@@ -122,7 +118,6 @@ export default function ChangePassword() {
               </small>
             </div>
 
-            {/* Confirm Password */}
             <div style={{ display: "flex", flexDirection: "column" }}>
               <label
                 style={{
@@ -141,13 +136,12 @@ export default function ChangePassword() {
               />
             </div>
 
-            {/* Update Button */}
+      
             <button type="submit" style={submitButtonStyle}>
               Update Password
             </button>
           </form>
 
-          {/* Security Tips */}
           <div
             style={{
               marginTop: "1.5rem",
@@ -176,7 +170,6 @@ export default function ChangePassword() {
   );
 }
 
-// Reusable Input + Button Styles
 const inputStyle = {
   width: "100%",
   padding: "0.75rem",

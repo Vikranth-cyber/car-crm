@@ -1,4 +1,4 @@
-// Settings.jsx – Ultra Premium Responsive Settings Page (Notifications & Media Only)
+
 import React, { useState } from "react";
 import { FiSettings, FiBell, FiImage } from "react-icons/fi";
 
@@ -24,7 +24,7 @@ export default function Settings() {
   const heading = {
     fontSize: "clamp(24px, 5vw, 32px)",
     fontWeight: "800",
-    color: "#0ea5e9", // matching sidebar active color
+    color: "#0ea5e9", 
     marginBottom: "24px",
     letterSpacing: "-0.5px",
     display: "flex",
@@ -109,13 +109,11 @@ export default function Settings() {
     <div style={container}>
       <h1 style={heading}><FiSettings /> System Settings</h1>
 
-      {/* Tab Bar */}
       <div style={tabBar}>
         <button style={tabBtn(activeTab === "notifications")} onClick={() => setActiveTab("notifications")}>Notifications</button>
         <button style={tabBtn(activeTab === "media")} onClick={() => setActiveTab("media")}>Media</button>
       </div>
 
-      {/* Active Content */}
       {renderContent()}
     </div>
   );
